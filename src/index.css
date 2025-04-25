@@ -11,6 +11,7 @@
   --text-secondary-2: var(--dark-blue-color-6);
   --text-placeholder: var(--grey-color-4);
   --text-disabled: var(--grey-color-6);
+  --text-inactive: var(--grey-color-4);
 
   /* Primary & Secondary Colors */
   --primary-color: var(--green-color-6);

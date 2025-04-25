@@ -18,29 +18,11 @@ const queryClient = new QueryClient({
   }
 });
 
-const customTheme = {
-  token: {
-    colorPrimary: 'var(--primary-color)',
-    colorLink: 'var(--primary-color)',
-    colorText: 'var(--text-primary)',
-    colorTextSecondary: 'var(--text-secondary-1)',
-    colorTextPlaceholder: 'var(--text-placeholder)',
-    colorTextDisabled: 'var(--text-disabled)',
-    colorBgBase: 'var(--bg-primary)',
-    colorBorder: 'var(--border-color)',
-    colorBorderSecondary: 'var(--bg-secondary-1)',
-    colorError: 'var(--color-error)',
-    colorSuccess: 'var(--color-success)',
-    colorWarning: 'var(--color-warning)',
-    colorInfo: 'var(--color-info)'
-  }
-};
-
 export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <ContextProvider>
       <QueryClientProvider client={queryClient}>
-        <ConfigProvider locale={enUS} theme={customTheme}>
+        <ConfigProvider locale={enUS}>
           <Provider store={store}>
             <AuthProvider>{children}</AuthProvider>
           </Provider>
