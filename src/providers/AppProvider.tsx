@@ -22,7 +22,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <ContextProvider>
       <QueryClientProvider client={queryClient}>
-        <ConfigProvider locale={enUS}>
+        <ConfigProvider
+          locale={enUS}
+          theme={{
+            token: {
+              fontFamily: 'Poppins, sans-serif'
+            }
+          }}
+        >
           <Provider store={store}>
             <AuthProvider>{children}</AuthProvider>
           </Provider>

@@ -8,6 +8,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import { logout } from '../redux/slices/authSlice';
 import { Button } from './Button';
+
 const Header = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -51,7 +52,14 @@ const Header = () => {
     >
       {/* Logo */}
       <Col>
-        <Link to='/' style={{ fontSize: '24px', fontWeight: 700 }}>
+        <Link
+          to='/'
+          style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            fontFamily: 'Lobster, sans-serif'
+          }}
+        >
           <span style={{ color: '#364573' }}>Eatery</span>
           <span style={{ color: '#00b14f' }}>Finder</span>
         </Link>
