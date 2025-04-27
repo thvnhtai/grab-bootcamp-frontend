@@ -14,3 +14,7 @@ type MessageType = {
   message: string;
   description?: string;
 };
+
+type Styles = {
+  [key: string]: ReturnType<typeof css>;
+};

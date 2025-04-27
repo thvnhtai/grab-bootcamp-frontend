@@ -30,13 +30,26 @@ const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
     case 'solid':
       return css`
         background: ${primaryColor};
-        color: ${whiteColor} !important;
+        color: ${whiteColor};
         border: none;
+        &:disabled {
+          background: ${borderColor};
+          color: ${inactiveColor};
+          opacity: 0.6;
+          &:hover,
+          &:active {
+            background: ${borderColor} !important;
+            color: ${inactiveColor} !important;
+            transform: none;
+          }
+        }
         &:hover {
           background: ${darken(0.05, primaryColor)} !important;
+          color: ${whiteColor} !important;
         }
         &:active {
           background: ${darken(0.1, primaryColor)} !important;
+          color: ${whiteColor} !important;
           transform: scale(0.98);
         }
       `;
@@ -46,6 +59,14 @@ const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
         background: transparent;
         border: 1px solid ${borderColor} !important;
         color: ${inactiveColor} !important;
+        &:disabled {
+          opacity: 0.6;
+          &:hover {
+            background: transparent !important;
+            border: 1px solid ${borderColor} !important;
+            color: ${inactiveColor} !important;
+          }
+        }
         &:hover {
           background: ${primaryColor}10 !important;
           border: 1px solid ${primaryColor} !important;
@@ -61,6 +82,10 @@ const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
           border-color: ${primaryColor} !important;
           color: ${primaryColor} !important;
         }
+        &:disabled:hover {
+          border-color: ${borderColor} !important;
+          color: ${inactiveColor} !important;
+        }
       `;
 
     case 'text':
@@ -69,6 +94,10 @@ const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
         border: none !important;
         color: ${inactiveColor};
         box-shadow: none !important;
+        &:disabled:hover {
+          color: ${inactiveColor} !important;
+          background: transparent !important;
+        }
         &:hover {
           color: ${primaryColor} !important;
           background: ${primaryColor}10 !important;
