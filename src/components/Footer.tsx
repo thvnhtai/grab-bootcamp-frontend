@@ -13,7 +13,7 @@ const Footer = () => {
         text-align: center;
       `}
     >
-      <p>&copy; {currentYear} FoodFind. All rights reserved.</p>
+      <p>&copy; {currentYear} EateryFinder. All rights reserved.</p>
     </footer>
   );
 };
