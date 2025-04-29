@@ -1,9 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { useState, useCallback } from 'react';
+import { Card, Typography } from 'antd';
+import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import ImageUpload from '../../components/ImageUpload';
-import { Card, Typography } from 'antd';
+import { useAppDispatch } from '../../redux/hooks';
+import { analyzeImage } from '../../redux/slices/foodSlice';
+import { PageURLs } from '../../utils/navigate';
 
 const STEP_CONFIG = [
   {
@@ -21,6 +25,8 @@ const STEP_CONFIG = [
 ];
 
 export default function SearchPage() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -30,17 +36,17 @@ export default function SearchPage() {
 
   const handleAnalyzeImage = useCallback(async () => {
     if (!imagePreview) return;
-    setUploading(true);
     try {
-      console.log('Analyzing image...');
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log('Analysis complete (simulated).');
+      await dispatch(analyzeImage(imagePreview)).unwrap();
+      navigate(PageURLs.ofSearchResult(), {
+        state: { uploadedImage: imagePreview }
+      });
     } catch (error) {
-      console.error('Error analyzing image:', error);
+      console.error('Analysis failed:', error);
     } finally {
       setUploading(false);
     }
-  }, [imagePreview]);
+  }, [imagePreview, navigate, dispatch]);
 
   return (
     <div css={styles.pageContainer}>

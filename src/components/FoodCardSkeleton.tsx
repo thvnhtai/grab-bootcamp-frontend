@@ -1,15 +1,16 @@
 import { Flex, Skeleton } from 'antd';
 import FoodCard, { FoodCardProps } from './FoodCard';
-
 interface FoodCardSkeletonProps extends FoodCardProps {
   loading?: boolean;
+  onClick?: () => void;
 }
 
 const FoodCardSkeleton = ({
   loading = true,
+  onClick,
   ...props
 }: FoodCardSkeletonProps) => {
-  if (!loading) return <FoodCard {...props} />;
+  if (!loading) return <FoodCard {...props} onClick={onClick} />;
 
   return (
     <div
@@ -36,8 +37,8 @@ const FoodCardSkeleton = ({
         title={false}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Skeleton.Button active size='small' style={{ width: 120 }} />
-        <Skeleton.Button active size='small' style={{ width: 60 }} />
+        <Skeleton.Button active size='small' style={{ width: 80 }} />{' '}
+        <Skeleton.Button active size='small' style={{ width: 80 }} />{' '}
       </div>
     </div>
   );
