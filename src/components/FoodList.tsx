@@ -1,31 +1,34 @@
+import type { ColProps } from 'antd';
 import { Col, Row } from 'antd';
+import type { Food } from '../types/food.d.ts';
 import FoodCardSkeleton from './FoodCardSkeleton';
 
 interface FoodListProps {
-  data: Array<{
-    id: number;
-    title: string;
-    rating: number;
-    description: string;
-    price: number;
-    distance: string;
-    images: string[];
-  }>;
+  data: Food[];
+  xs?: ColProps['xs'];
+  sm?: ColProps['sm'];
+  md?: ColProps['md'];
+  lg?: ColProps['lg'];
+  xl?: ColProps['xl'];
 }
 
-const FoodList = ({ data }: FoodListProps) => {
+const FoodList = ({
+  data,
+  xs = 24,
+  sm = 12,
+  md = 8,
+  lg = 6,
+  xl = 6,
+  onItemClick
+}: FoodListProps & { onItemClick?: (item: Food) => void }) => {
   return (
     <Row gutter={[32, 32]}>
       {data.map((item) => (
-        <Col key={item.id} xs={24} sm={12} md={8} lg={6}>
+        <Col key={item.id} xs={xs} sm={sm} md={md} lg={lg} xl={xl}>
           <FoodCardSkeleton
             loading={!item}
-            title={item.title}
-            rating={item.rating}
-            description={item.description}
-            price={item.price}
-            distance={item.distance}
-            images={item.images}
+            {...item}
+            onClick={() => onItemClick?.(item)}
           />
         </Col>
       ))}

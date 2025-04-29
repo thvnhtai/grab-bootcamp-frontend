@@ -18,3 +18,11 @@ type MessageType = {
 type Styles = {
   [key: string]: ReturnType<typeof css>;
 };
+
+type SortByOption = 'compatibilityScore' | 'rating' | 'distance';
+
+type Filters = {
+  searchTerm: string;
+  sortBy: SortByOption;
+  minRating: number;
+};

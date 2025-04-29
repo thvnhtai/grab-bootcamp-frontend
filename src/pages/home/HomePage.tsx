@@ -3,6 +3,7 @@ import { ArrowRightOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { css, keyframes } from '@emotion/react';
 import { Button } from '../../components/Button';
 import FoodList from '../../components/FoodList';
+import { sampleData } from '../../constants/data.constant';
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -13,93 +14,6 @@ const scaleIn = keyframes`
   from { transform: scale(0.8); }
   to { transform: scale(1); }
 `;
-
-const sampleData = [
-  {
-    id: 1,
-    title: 'Salad Sensation',
-    rating: 4.91,
-    description:
-      'Fresh, creative salads with house-made dressings. Options for vegan, keto, and other dietary preferences.',
-    price: 100000,
-    distance: '1.2 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  },
-  {
-    id: 2,
-    title: 'Pho Paradise',
-    rating: 4.75,
-    description:
-      'Traditional Vietnamese pho with rich broth, tender beef slices, and fresh herbs.',
-    price: 60000,
-    distance: '0.8 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  },
-  {
-    id: 3,
-    title: 'Banh Mi Bros',
-    rating: 4.82,
-    description:
-      'Crispy baguette with pork, pate, pickled veggies, and spicy mayo. Fast and flavorful.',
-    price: 30000,
-    distance: '1.5 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  },
-  {
-    id: 4,
-    title: 'Sushi Street',
-    rating: 4.88,
-    description:
-      'Fresh sushi and sashimi platters made to order. Great for quick bites or sushi fans.',
-    price: 150000,
-    distance: '2.3 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  },
-  {
-    id: 5,
-    title: 'Vegan Vibes',
-    rating: 4.95,
-    description:
-      '100% plant-based menu featuring burgers, noodles, and rice bowls. Eco-friendly packaging.',
-    price: 90000,
-    distance: '0.6 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  },
-  {
-    id: 6,
-    title: 'Com Tam Corner',
-    rating: 4.69,
-    description:
-      'Grilled pork, broken rice, and crispy egg served with classic fish sauce.',
-    price: 45000,
-    distance: '1.0 km',
-    images: [
-      'https://placehold.co/400x200',
-      'https://placehold.co/600x400',
-      'https://placehold.co/800x600'
-    ]
-  }
-];
 
 export default function HomePage() {
   return (
@@ -219,9 +133,6 @@ export default function HomePage() {
             Check out some of the most popular food stalls and restaurants
             discovered by our users
           </p>
-          <Button variant='filled' css={ctaButton}>
-            Get Started Now
-          </Button>
         </div>
       </section>
 
@@ -433,7 +344,7 @@ const features = [
 
 const ctaSection = css`
   ${sectionBase}
-  padding: 3rem 2rem;
+  padding: 1.5rem 1rem;
   background-color: var(--secondary-color);
   color: white;
 `;
@@ -460,21 +371,6 @@ const ctaText = css`
   margin-left: auto;
   margin-right: auto;
   opacity: 0.9;
-`;
-
-const ctaButton = css`
-  font-size: 1.125rem;
-  font-weight: 500;
-  padding: 2rem 1.5rem;
-
-  @media (min-width: 768px) {
-    padding: 1.5rem 2rem;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-    padding: 1.2rem 1.5rem;
-  }
 `;
 
 const foodSection = css`

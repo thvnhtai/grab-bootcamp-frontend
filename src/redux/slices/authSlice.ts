@@ -13,7 +13,7 @@ export type AuthSliceState = {
 const initialState: AuthSliceState = {
   loading: false,
   profileLoading: true,
-  isAuthenticated: true
+  isAuthenticated: false
 };
 
 export const authSlice = createAppSlice({

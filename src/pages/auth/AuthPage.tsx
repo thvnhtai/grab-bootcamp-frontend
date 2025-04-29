@@ -7,10 +7,11 @@ import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { FormField } from '../../components/FormField';
 import { GoogleIcon } from '../../components/static/GoogleIcon';
+import Logo from '../../components/static/Logo';
 
 type TabKey = 'signin' | 'signup';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('signin');
@@ -68,10 +69,9 @@ const AuthPage = () => {
           <div css={styles.cardOverlay}></div>
           <div css={styles.cardContent}>
             <div css={styles.headerWrapper}>
-              <Title level={2} css={[styles.heading, styles.branding]}>
-                <span className='secondary'>Eatery</span>
-                <span className='primary'>Finder</span>
-              </Title>
+              <div>
+                <Logo />
+              </div>
               <Text css={styles.subtitle}>
                 {activeTab === 'signin'
                   ? 'Sign in to your account to continue'

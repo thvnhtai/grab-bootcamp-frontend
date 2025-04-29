@@ -13,6 +13,7 @@ export const PageURLs = {
 
   // search
   ofSearch: () => withPrefix('/search'),
+  ofSearchResult: () => withPrefix('/search/result'),
 
   // internal server error
   of500: () => withPrefix('/500'),
