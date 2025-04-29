@@ -5,39 +5,30 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import ImageUpload from '../../components/ImageUpload';
+import { STEP_CONFIG } from '../../constants/common.constant';
 import { useAppDispatch } from '../../redux/hooks';
-import { analyzeImage } from '../../redux/slices/foodSlice';
+import { analyzeImage } from '../../redux/slices/restaurantSlice';
 import { PageURLs } from '../../utils/navigate';
-
-const STEP_CONFIG = [
-  {
-    title: 'Upload a Food Picture',
-    description: "Take a clear photo of any food dish you'd like to find."
-  },
-  {
-    title: 'We Analyze the Dish',
-    description: 'Our AI identifies the food and matches it to local offerings.'
-  },
-  {
-    title: 'Get Recommendations',
-    description: 'We show you the best places nearby that serve similar dishes.'
-  }
-];
 
 export default function SearchPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const handleImageUpload = useCallback((base64Image: string) => {
-    setImagePreview(base64Image);
+  const handleImageUpload = useCallback((file: File, preview: string) => {
+    setImageFile(file);
+    setImagePreview(preview);
   }, []);
 
   const handleAnalyzeImage = useCallback(async () => {
-    if (!imagePreview) return;
+    if (!imageFile) return;
+
+    setUploading(true);
     try {
-      await dispatch(analyzeImage(imagePreview)).unwrap();
+      await dispatch(analyzeImage(imageFile)).unwrap();
+
       navigate(PageURLs.ofSearchResult(), {
         state: { uploadedImage: imagePreview }
       });
@@ -46,7 +37,7 @@ export default function SearchPage() {
     } finally {
       setUploading(false);
     }
-  }, [imagePreview, navigate, dispatch]);
+  }, [imageFile, imagePreview, navigate, dispatch]);
 
   return (
     <div css={styles.pageContainer}>
@@ -58,7 +49,7 @@ export default function SearchPage() {
           </Typography.Title>
           <Typography.Paragraph css={styles.subtitle}>
             Take a photo of any food dish, and we'll find the best local
-            restaurants and food stalls that serve it.
+            restaurants that serve it.
           </Typography.Paragraph>
         </div>
 

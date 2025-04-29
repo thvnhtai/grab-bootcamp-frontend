@@ -6,19 +6,19 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import Filters from '../../components/Filters';
-import FoodDetailModal from '../../components/FoodDetailModal';
-import FoodList from '../../components/FoodList';
+import RestaurantDetailModal from '../../components/RestaurantDetailModal';
+import RestaurantList from '../../components/RestaurantList';
 import { useAppSelector } from '../../redux/hooks';
 import {
-  selectFoodData,
-  selectFoodLoading
-} from '../../redux/slices/foodSlice';
-import { Food } from '../../types/food';
+  selectRestaurantData,
+  selectRestaurantLoading
+} from '../../redux/slices/restaurantSlice';
+import { Restaurant } from '../../types/restaurant';
 import { PageURLs } from '../../utils/navigate';
 
 export default function SearchResultPage() {
-  const data = useAppSelector(selectFoodData);
-  const isLoading = useSelector(selectFoodLoading);
+  const data = useAppSelector(selectRestaurantData);
+  const isLoading = useSelector(selectRestaurantLoading);
 
   const location = useLocation();
   const uploadedImage = location.state?.uploadedImage;
@@ -31,11 +31,12 @@ export default function SearchResultPage() {
     console.log('Filters changed:', filters);
   };
 
-  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<Restaurant | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleFoodClick = (food: Food) => {
-    setSelectedFood(food);
+  const handleRestaurantClick = (restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
     setIsModalOpen(true);
   };
 
@@ -56,7 +57,7 @@ export default function SearchResultPage() {
           <div css={styles.imagePreviewContainer}>
             <img
               src={uploadedImage}
-              alt='Uploaded Food'
+              alt='Uploaded Restaurant'
               css={styles.previewImage}
             />
           </div>
@@ -76,12 +77,12 @@ export default function SearchResultPage() {
               <Spin size='large' />
             </div>
           ) : data.length > 0 ? (
-            <FoodList
+            <RestaurantList
               data={data}
               md={12}
               lg={8}
               xl={6}
-              onItemClick={handleFoodClick}
+              onItemClick={handleRestaurantClick}
             />
           ) : (
             <div css={styles.spinnerContainer}>
@@ -91,8 +92,8 @@ export default function SearchResultPage() {
         </Col>
       </Row>
 
-      <FoodDetailModal
-        data={selectedFood}
+      <RestaurantDetailModal
+        data={selectedRestaurant}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

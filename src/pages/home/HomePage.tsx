@@ -2,7 +2,7 @@
 import { ArrowRightOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { css, keyframes } from '@emotion/react';
 import { Button } from '../../components/Button';
-import FoodList from '../../components/FoodList';
+import RestaurantList from '../../components/RestaurantList';
 import { sampleData } from '../../constants/data.constant';
 
 const fadeIn = keyframes`
@@ -23,7 +23,7 @@ export default function HomePage() {
         <div css={heroImageWrapper}>
           <img
             src='https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1974'
-            alt='Food Spread'
+            alt='Restaurant Spread'
             css={heroImage}
           />
           <div css={heroOverlay} />
@@ -32,11 +32,11 @@ export default function HomePage() {
         <div css={heroContent}>
           <div css={heroTextWrapper}>
             <h1 css={heroHeading}>
-              Find Nearby Food Stalls by Uploading a Dish Photo
+              Find Nearby Restaurant by Uploading a Dish Photo
             </h1>
             <p css={heroDescription}>
               Craving a dish but don't know where to find it? Upload a photo and
-              we'll recommend the best local food stalls serving similar dishes
+              we'll recommend the best local restaurants serving similar dishes
               near you.
             </p>
             <Button
@@ -83,7 +83,7 @@ export default function HomePage() {
                     [
                       'Take a photo of a dish you love or upload an existing one from your gallery.',
                       'Our AI identifies the dish and understands what makes it unique.',
-                      'Get personalized recommendations for nearby food stalls serving similar dishes.'
+                      'Get personalized recommendations for nearby restaurants serving similar dishes.'
                     ][index]
                   }
                 </p>
@@ -98,7 +98,9 @@ export default function HomePage() {
         <div css={container}>
           <div css={featuresGrid}>
             <div>
-              <h2 css={featuresTitle}>Find Your Next Favorite Food Spot</h2>
+              <h2 css={featuresTitle}>
+                Find Your Next Favorite Restaurant Spot
+              </h2>
               <p css={featuresDescription}>
                 EateryFinder helps you discover authentic local eateries based
                 on your food preferences. Whether you're a tourist exploring new
@@ -130,16 +132,16 @@ export default function HomePage() {
         <div css={[container, ctaContainer]}>
           <h2 css={ctaHeading}>Popular Discoveries</h2>
           <p css={ctaText}>
-            Check out some of the most popular food stalls and restaurants
-            discovered by our users
+            Check out some of the most popular restaurants discovered by our
+            users
           </p>
         </div>
       </section>
 
-      {/* Food Section */}
-      <section css={foodSection}>
+      {/* Restaurant Section */}
+      <section css={restaurantSection}>
         <div css={container}>
-          <FoodList data={sampleData} />
+          <RestaurantList data={sampleData} />
         </div>
       </section>
     </main>
@@ -373,7 +375,7 @@ const ctaText = css`
   opacity: 0.9;
 `;
 
-const foodSection = css`
+const restaurantSection = css`
   ${sectionBase}
   background-color: white;
 `;

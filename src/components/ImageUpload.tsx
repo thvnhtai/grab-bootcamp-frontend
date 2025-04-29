@@ -13,7 +13,7 @@ import { fileToBase64 } from '../utils/common';
 import { Button } from './Button';
 
 interface ImageUploadProps {
-  onImageUpload: (base64Image: string) => void;
+  onImageUpload: (file: File, previewUrl: string) => void;
 }
 
 export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
@@ -26,7 +26,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
       try {
         const base64 = await fileToBase64(file);
         setPreview(base64);
-        onImageUpload(base64);
+        onImageUpload(file, base64);
       } catch (error) {
         console.error('Error processing file:', error);
       }
@@ -76,7 +76,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
 
   const handleRemoveImage = useCallback(() => {
     setPreview(null);
-    onImageUpload('');
+    onImageUpload(null as unknown as File, '');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

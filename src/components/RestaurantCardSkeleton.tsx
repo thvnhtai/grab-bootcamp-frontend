@@ -1,16 +1,16 @@
 import { Flex, Skeleton } from 'antd';
-import FoodCard, { FoodCardProps } from './FoodCard';
-interface FoodCardSkeletonProps extends FoodCardProps {
+import RestaurantCard, { RestaurantCardProps } from './RestaurantCard';
+interface RestaurantCardSkeletonProps extends RestaurantCardProps {
   loading?: boolean;
   onClick?: () => void;
 }
 
-const FoodCardSkeleton = ({
+const RestaurantCardSkeleton = ({
   loading = true,
   onClick,
   ...props
-}: FoodCardSkeletonProps) => {
-  if (!loading) return <FoodCard {...props} onClick={onClick} />;
+}: RestaurantCardSkeletonProps) => {
+  if (!loading) return <RestaurantCard {...props} onClick={onClick} />;
 
   return (
     <div
@@ -44,4 +44,4 @@ const FoodCardSkeleton = ({
   );
 };
 
-export default FoodCardSkeleton;
+export default RestaurantCardSkeleton;

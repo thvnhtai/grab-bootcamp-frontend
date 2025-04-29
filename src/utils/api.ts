@@ -9,7 +9,7 @@ export class ApiService {
   public readonly apiUrl: string;
 
   constructor(host: string) {
-    this.apiUrl = `${host}/api/v1`;
+    this.apiUrl = `${host}`;
   }
 
   static getToken(): string | null {
