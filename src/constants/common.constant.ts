@@ -1,4 +1,4 @@
-export const DEFAULT_IMAGE = 'https://placehold.co/800x800';
+export const DEFAULT_IMAGE = 'https://placehold.co/800x400';
 
 export const STEP_CONFIG = [
   {

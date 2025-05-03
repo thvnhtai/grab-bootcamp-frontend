@@ -5,28 +5,29 @@ import { Badge, Card, Carousel, Flex, Image, Tooltip, Typography } from 'antd';
 import { DEFAULT_IMAGE } from '../constants/common.constant.ts';
 import { PRICE_LEVEL } from '../constants/price.constants.ts';
 import type { Restaurant } from '../types/restaurant';
+import { formatScorePercentage } from '../utils/common.ts';
 import PriceLevelTag from './PriceLevelTag.tsx';
-const { Text, Title, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 export type RestaurantCardProps = Pick<
   Restaurant,
   | 'restaurantName'
-  | 'averageRating'
-  | 'restaurantDescription'
+  | 'restaurantRating'
+  | 'address'
   | 'priceLevel'
   | 'distance'
-  | 'imageUrl'
-  | 'matchScore'
+  | 'avatarUrl'
+  | 'score'
 >;
 
 const RestaurantCard = ({
   restaurantName,
-  averageRating,
-  restaurantDescription,
+  restaurantRating,
+  address,
   priceLevel,
   distance,
-  imageUrl,
-  matchScore,
+  avatarUrl,
+  score,
   onClick
 }: RestaurantCardProps & { onClick?: () => void }) => {
   const priceConfig = PRICE_LEVEL[priceLevel] || {
@@ -36,7 +37,9 @@ const RestaurantCard = ({
 
   return (
     <Badge.Ribbon
-      text={matchScore != null ? `${matchScore}% match` : '0% match'}
+      text={
+        score != null ? `${formatScorePercentage(score)} match` : '0% match'
+      }
       color='var(--primary-color)'
     >
       <Card
@@ -51,10 +54,12 @@ const RestaurantCard = ({
             >
               <div>
                 <Image
-                  src={imageUrl || DEFAULT_IMAGE}
+                  src={avatarUrl || DEFAULT_IMAGE}
                   alt={restaurantName || 'Restaurant image'}
-                  placeholder
                   width='100%'
+                  height={200}
+                  placeholder
+                  fallback={DEFAULT_IMAGE}
                 />
               </div>
             </Carousel>
@@ -63,21 +68,26 @@ const RestaurantCard = ({
         onClick={onClick}
       >
         <Flex vertical css={styles.contentWrapper}>
-          <Flex justify='space-between' align='center'>
-            <Title style={{ margin: 0, fontSize: '14px' }}>
+          <Flex justify='space-between' align='center' gap={4}>
+            <Paragraph
+              ellipsis={{ rows: 1, symbol: '...', tooltip: true }}
+              style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}
+            >
               {restaurantName || 'Unnamed Restaurant'}
-            </Title>
-            <Flex align='center' gap={4}>
-              <StarFilled css={styles.ratingText} />
-              <Text css={styles.ratingText}>{averageRating ?? 0}</Text>
-            </Flex>
+            </Paragraph>
+            <div css={styles.ratingContainer}>
+              <StarFilled css={styles.ratingIcon} />
+              <Text css={styles.ratingText}>
+                {restaurantRating?.toFixed(1) ?? 0}
+              </Text>
+            </div>
           </Flex>
 
           <Paragraph
             type='secondary'
             ellipsis={{ rows: 2, symbol: '...', tooltip: true }}
           >
-            {restaurantDescription || 'No description available.'}
+            {address || 'No description available.'}
           </Paragraph>
 
           <Flex justify='space-between' align='center'>
@@ -119,8 +129,31 @@ const styles = {
     padding: 0;
     gap: 0.5rem;
   `,
+  ratingContainer: css`
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 8px;
+
+    @media (max-width: 768px) {
+      gap: 4px;
+    }
+  `,
+  ratingIcon: css`
+    font-size: 14px;
+    color: var(--yellow-color-6);
+
+    @media (max-width: 480px) {
+      font-size: 12px;
+    }
+  `,
   ratingText: css`
     color: var(--yellow-color-6);
+    white-space: nowrap;
+
+    @media (max-width: 480px) {
+      font-size: 12px;
+    }
   `,
   distanceText: css`
     color: var(--grey-color-4);

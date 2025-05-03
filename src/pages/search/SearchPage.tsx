@@ -1,56 +1,56 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Card, Typography } from 'antd';
+import { Card, Typography, message } from 'antd';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import ImageUpload from '../../components/ImageUpload';
 import { STEP_CONFIG } from '../../constants/common.constant';
-import { useAppDispatch } from '../../redux/hooks';
-import { analyzeImage } from '../../redux/slices/restaurantSlice';
+import { useAnalyzeImage } from '../../hooks/useAnalyzeImage';
 import { PageURLs } from '../../utils/navigate';
 
-export default function SearchPage() {
+const { Title, Paragraph } = Typography;
+
+interface ImageData {
+  file: File;
+  preview: string;
+}
+
+const SearchPage = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const { analyzeImage, isLoading } = useAnalyzeImage();
+  const [imageData, setImageData] = useState<ImageData | null>(null);
 
   const handleImageUpload = useCallback((file: File, preview: string) => {
-    setImageFile(file);
-    setImagePreview(preview);
+    setImageData({ file, preview });
   }, []);
 
   const handleAnalyzeImage = useCallback(async () => {
-    if (!imageFile) return;
+    if (!imageData) return;
 
-    setUploading(true);
     try {
-      await dispatch(analyzeImage(imageFile)).unwrap();
-
-      navigate(PageURLs.ofSearchResult(), {
-        state: { uploadedImage: imagePreview }
-      });
+      const restaurants = await analyzeImage(imageData.file);
+      sessionStorage.setItem('searchResults', JSON.stringify(restaurants));
+      sessionStorage.setItem('uploadedImagePreview', imageData.preview);
+      navigate(PageURLs.ofSearchResult());
     } catch (error) {
-      console.error('Analysis failed:', error);
-    } finally {
-      setUploading(false);
+      console.error('Image analysis failed:', error);
+      message.error('Failed to analyze the image. Please try again.');
     }
-  }, [imageFile, imagePreview, navigate, dispatch]);
+  }, [imageData, analyzeImage, navigate]);
 
   return (
     <div css={styles.pageContainer}>
       <main css={styles.contentWrapper}>
         {/* Header Section */}
         <div css={styles.header}>
-          <Typography.Title level={2} css={styles.heading}>
+          <Title level={2} css={styles.heading}>
             Upload a Food Image
-          </Typography.Title>
-          <Typography.Paragraph css={styles.subtitle}>
+          </Title>
+          <Paragraph css={styles.subtitle}>
             Take a photo of any food dish, and we'll find the best local
             restaurants that serve it.
-          </Typography.Paragraph>
+          </Paragraph>
         </div>
 
         {/* Upload Section */}
@@ -60,29 +60,29 @@ export default function SearchPage() {
             <Button
               variant='solid'
               onClick={handleAnalyzeImage}
-              disabled={!imagePreview || uploading}
+              disabled={!imageData || isLoading}
               css={styles.analyzeButton}
             >
-              {uploading ? 'Analyzing...' : 'Analyze Dish'}
+              {isLoading ? 'Analyzing...' : 'Analyze Dish'}
             </Button>
           </div>
         </div>
 
         {/* How It Works Section */}
         <section css={styles.howItWorks}>
-          <Typography.Title level={2} css={styles.sectionHeading}>
+          <Title level={2} css={styles.sectionHeading}>
             How It Works
-          </Typography.Title>
+          </Title>
           <div css={styles.stepsContainer}>
             {STEP_CONFIG.map((step, index) => (
               <Card key={`step-${index}`} css={styles.stepCard}>
                 <div css={styles.stepIndicator}>{index + 1}</div>
-                <Typography.Title level={4} css={styles.stepTitle}>
+                <Title level={4} css={styles.stepTitle}>
                   {step.title}
-                </Typography.Title>
-                <Typography.Paragraph css={styles.stepDescription}>
+                </Title>
+                <Paragraph css={styles.stepDescription}>
                   {step.description}
-                </Typography.Paragraph>
+                </Paragraph>
               </Card>
             ))}
           </div>
@@ -90,8 +90,7 @@ export default function SearchPage() {
       </main>
     </div>
   );
-}
-
+};
 const styles: Styles = {
   // Layout
   pageContainer: css`
@@ -195,3 +194,5 @@ const styles: Styles = {
     line-height: 1.4;
   `
 };
+
+export default SearchPage;

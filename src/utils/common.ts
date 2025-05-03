@@ -31,6 +31,11 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
+export const formatScorePercentage = (score: number | null | undefined): string => {
+  const value = (score ?? 0) * 100;
+  return `${value.toFixed(1)}%`;
+};
+
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
