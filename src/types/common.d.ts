@@ -19,10 +19,21 @@ type Styles = {
   [key: string]: ReturnType<typeof css>;
 };
 
-type SortByOption = 'compatibilityScore' | 'rating' | 'distance';
+type SortByOption = 'score' | 'rating' | 'distance';
 
 type Filters = {
   searchTerm: string;
   sortBy: SortByOption;
   minRating: number;
+};
+
+type ApiResponse<T> = {
+  status: number;
+  message: string;
+  data: T;
+  metadata?: {
+    page: number;
+    size: number;
+    total: number;
+  };
 };

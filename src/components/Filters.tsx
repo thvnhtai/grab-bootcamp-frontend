@@ -10,7 +10,7 @@ type FiltersProps = {
 };
 
 const SORT_OPTIONS = [
-  { value: 'compatibilityScore', label: 'Best Match' },
+  { value: 'score', label: 'Best Match' },
   { value: 'rating', label: 'Highest Rating' },
   { value: 'distance', label: 'Closest' }
 ] as const;
@@ -21,7 +21,7 @@ const RATING_STEP = 0.1;
 
 export default function Filters({ onFilterChange }: FiltersProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<SortByOption>('compatibilityScore');
+  const [sortBy, setSortBy] = useState<SortByOption>('score');
   const [minRating, setMinRating] = useState(0);
 
   const filters = useMemo(
@@ -35,7 +35,7 @@ export default function Filters({ onFilterChange }: FiltersProps) {
 
   const handleReset = () => {
     setSearchTerm('');
-    setSortBy('compatibilityScore');
+    setSortBy('score');
     setMinRating(0);
   };
 

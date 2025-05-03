@@ -2,58 +2,129 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { css } from '@emotion/react';
 import { Col, Empty, Flex, Row, Spin } from 'antd';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Filters from '../../components/Filters';
-import FoodDetailModal from '../../components/FoodDetailModal';
-import FoodList from '../../components/FoodList';
-import { useAppSelector } from '../../redux/hooks';
-import {
-  selectFoodData,
-  selectFoodLoading
-} from '../../redux/slices/foodSlice';
-import { Food } from '../../types/food';
+import RestaurantDetailModal from '../../components/RestaurantDetailModal';
+import RestaurantList from '../../components/RestaurantList';
+import { fetchRestaurantDetails } from '../../services/restaurant.service';
+import { Restaurant } from '../../types/restaurant';
 import { PageURLs } from '../../utils/navigate';
 
-export default function SearchResultPage() {
-  const data = useAppSelector(selectFoodData);
-  const isLoading = useSelector(selectFoodLoading);
-
-  const location = useLocation();
-  const uploadedImage = location.state?.uploadedImage;
-
-  const handleFilterChange = (filters: {
-    searchTerm: string;
-    sortBy: string;
-    minRating: number;
-  }) => {
-    console.log('Filters changed:', filters);
-  };
-
-  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+const SearchResultPage = () => {
+  const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
+    []
+  );
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [restaurantCache, setRestaurantCache] = useState<
+    Record<string, Restaurant>
+  >({});
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<Restaurant | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState<Filters>({
+    searchTerm: '',
+    sortBy: 'score',
+    minRating: 0
+  });
 
-  const handleFoodClick = (food: Food) => {
-    setSelectedFood(food);
-    setIsModalOpen(true);
-  };
+  useEffect(() => {
+    const storedResults = sessionStorage.getItem('searchResults');
+    const storedImage = sessionStorage.getItem('uploadedImagePreview');
+
+    if (storedResults) {
+      try {
+        const parsedRestaurants = JSON.parse(storedResults);
+        setAllRestaurants(parsedRestaurants);
+        setFilteredRestaurants(parsedRestaurants);
+      } catch (error) {
+        console.error('Failed to parse search results:', error);
+        sessionStorage.removeItem('searchResults');
+      }
+    }
+    if (storedImage) {
+      setUploadedImage(storedImage);
+    }
+  }, []);
+
+  const handleFilterChange = useCallback((filters: Filters) => {
+    setCurrentFilters(filters);
+  }, []);
+
+  useEffect(() => {
+    let result = [...allRestaurants];
+    if (currentFilters.searchTerm) {
+      const term = currentFilters.searchTerm.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.restaurantName?.toLowerCase().includes(term) ||
+          r.address?.toLowerCase().includes(term)
+      );
+    }
+
+    if (currentFilters.minRating > 0) {
+      result = result.filter(
+        (r) => (r.restaurantRating ?? 0) >= currentFilters.minRating
+      );
+    }
+
+    switch (currentFilters.sortBy) {
+      case 'rating':
+        result.sort(
+          (a, b) => (b.restaurantRating ?? 0) - (a.restaurantRating ?? 0)
+        );
+        break;
+      case 'distance':
+        result.sort(
+          (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)
+        );
+        break;
+      case 'score':
+      default:
+        result.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+        break;
+    }
+
+    setFilteredRestaurants(result);
+  }, [allRestaurants, currentFilters]);
+
+  const handleRestaurantClick = useCallback(
+    async (restaurant: Restaurant) => {
+      const cached = restaurantCache[restaurant.restaurantId];
+      if (cached) {
+        setSelectedRestaurant(cached);
+        setIsModalOpen(true);
+        return;
+      }
+
+      setIsDetailLoading(true);
+      try {
+        const detailedRestaurant = await fetchRestaurantDetails(restaurant);
+        setRestaurantCache((prev) => ({
+          ...prev,
+          [restaurant.restaurantId]: detailedRestaurant
+        }));
+        setSelectedRestaurant(detailedRestaurant);
+        setIsModalOpen(true);
+      } catch (error) {
+        console.error('Failed to load restaurant details:', error);
+      } finally {
+        setIsDetailLoading(false);
+      }
+    },
+    [restaurantCache]
+  );
 
   return (
-    <Flex vertical css={styles.pageContainer}>
-      {/* Header Section */}
-      <Flex
-        align='center'
-        justify='space-between'
-        gap={16}
-        css={styles.headerRow}
-      >
+    <Flex vertical css={styles.container}>
+      <Flex align='center' justify='space-between' css={styles.header}>
         <Link to={PageURLs.ofSearch()} css={styles.backLink}>
           <ArrowLeftOutlined /> Back to Upload
         </Link>
-
         {uploadedImage && (
-          <div css={styles.imagePreviewContainer}>
+          <div css={styles.imagePreview}>
             <img
               src={uploadedImage}
               alt='Uploaded Food'
@@ -64,58 +135,66 @@ export default function SearchResultPage() {
       </Flex>
 
       <Row gutter={[32, 16]}>
-        {/* Filters Sidebar */}
-        <Col xs={24} md={6} css={styles.filterContainer}>
+        <Col xs={24} md={6} css={styles.filters}>
           <Filters onFilterChange={handleFilterChange} />
         </Col>
-
-        {/* Results Area */}
         <Col xs={24} md={18}>
-          {isLoading ? (
-            <div css={styles.spinnerContainer}>
+          {allRestaurants.length === 0 && !uploadedImage ? (
+            <div css={styles.loading}>
               <Spin size='large' />
             </div>
-          ) : data.length > 0 ? (
-            <FoodList
-              data={data}
+          ) : (
+            <RestaurantList
+              data={filteredRestaurants}
               md={12}
               lg={8}
               xl={6}
-              onItemClick={handleFoodClick}
+              onItemClick={handleRestaurantClick}
             />
-          ) : (
-            <div css={styles.spinnerContainer}>
+          )}
+          {filteredRestaurants.length === 0 && allRestaurants.length > 0 && (
+            <div css={styles.empty}>
               <Empty description='No results found matching your criteria.' />
             </div>
           )}
         </Col>
       </Row>
 
-      <FoodDetailModal
-        data={selectedFood}
+      <RestaurantDetailModal
+        data={selectedRestaurant}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        isLoading={isDetailLoading}
       />
     </Flex>
   );
-}
+};
 
 const styles = {
-  pageContainer: css`
+  container: css`
     min-height: 100vh;
     padding: 2rem 5%;
     background-color: var(--bg-primary);
   `,
-  headerRow: css`
+  header: css`
     margin-bottom: 1.5rem;
   `,
-  imagePreviewContainer: css`
+  backLink: css`
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    &:hover {
+      color: var(--primary-color);
+    }
+  `,
+  imagePreview: css`
     width: 5rem;
     height: 5rem;
     border-radius: 8px;
     overflow: hidden;
     background-color: var(--bg-disabled);
-    flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   `,
   previewImage: css`
@@ -123,38 +202,28 @@ const styles = {
     height: 100%;
     object-fit: cover;
   `,
-  backLink: css`
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    &:hover {
-      color: var(--primary-color);
-    }
-  `,
-  filterContainer: css`
+  filters: css`
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
     background-color: var(--bg-primary);
-    z-index: 1;
-
     @media (min-width: 768px) {
       position: sticky;
       top: 6rem;
       align-self: flex-start;
     }
-
-    @media (max-width: 767px) {
-      position: static;
-      max-height: none;
-      margin-bottom: 1rem;
-    }
   `,
-  spinnerContainer: css`
+  loading: css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  `,
+  empty: css`
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 300px;
   `
 };
+
+export default SearchResultPage;

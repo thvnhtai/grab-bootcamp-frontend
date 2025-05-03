@@ -1,89 +1,98 @@
-import { Food } from '../types/food';
+import { Restaurant } from '../types/restaurant';
 
-export const sampleData: Food[] = [
+export const sampleData: Restaurant[] = [
   {
-    id: '1',
-    name: 'Salad Sensation',
-    rating: 4.91,
-    description:
+    restaurantId: '1',
+    restaurantRatingCount: 150,
+    restaurantName: 'Salad Sensation',
+    restaurantRating: 4.91,
+    restaurantDescription:
       'Fresh, creative salads with house-made dressings. Options for vegan, keto, and other dietary preferences.',
     priceLevel: 2,
     distance: 1.2,
-    imageUrl: 'https://placehold.co/400x200',
-    compatibility: 95,
+    avatarUrl: 'https://placehold.co/400x200',
+    score: 95,
     address: '123 Salad St, City',
-    hours: 'Mon-Fri 9am-8pm',
-    menu: [{ name: 'Caesar Salad', price: 80000 }],
-    reviews: [
-      { author: 'Jane D.', rating: 5, comment: 'Amazing!', date: '2024-07-26' }
+    openingHours: 'Mon-Fri 9am-8pm',
+    menuItems: [{ itemName: 'Caesar Salad', itemPrice: 80000 }],
+    customerReviews: [
+      {
+        reviewUserName: 'Jane D.',
+        userRating: 5,
+        userReview: 'Amazing!',
+        reviewDate: '2024-07-26'
+      }
     ],
     mapUrl: 'https://maps.google.com/?q=123+Salad+St'
   },
   {
-    id: '2',
-    name: 'Pho Paradise',
-    rating: 4.75,
-    description:
+    restaurantId: '2',
+    restaurantRatingCount: 120,
+    restaurantName: 'Pho Paradise',
+    restaurantRating: 4.75,
+    restaurantDescription:
       'Traditional Vietnamese pho with rich broth, tender beef slices, and fresh herbs.',
     priceLevel: 1,
     distance: 0.8,
-    imageUrl: 'https://placehold.co/400x200',
-    compatibility: 88,
+    avatarUrl: 'https://placehold.co/400x200',
+    score: 88,
     address: '456 Pho Ave, City',
-    hours: 'Daily 11am-10pm',
-    menu: [{ name: 'Beef Pho', price: 60000 }],
-    reviews: [
+    openingHours: 'Daily 11am-10pm',
+    menuItems: [{ itemName: 'Beef Pho', itemPrice: 60000 }],
+    customerReviews: [
       {
-        author: 'John S.',
-        rating: 4.5,
-        comment: 'Authentic!',
-        date: '2024-07-25'
+        reviewUserName: 'John S.',
+        userRating: 4.5,
+        userReview: 'Authentic!',
+        reviewDate: '2024-07-25'
       }
     ],
     mapUrl: 'https://maps.google.com/?q=456+Pho+Ave'
   },
   {
-    id: '3',
-    name: 'Banh Mi Bros',
-    rating: 4.82,
-    description:
+    restaurantId: '3',
+    restaurantRatingCount: 135,
+    restaurantName: 'Banh Mi Bros',
+    restaurantRating: 4.82,
+    restaurantDescription:
       'Crispy baguette with pork, pate, pickled veggies, and spicy mayo. Fast and flavorful.',
     priceLevel: 1,
     distance: 1.5,
-    imageUrl: 'https://placehold.co/400x200',
-    compatibility: 92,
+    avatarUrl: 'https://placehold.co/400x200',
+    score: 92,
     address: '789 Banh Mi Blvd, City',
-    hours: 'Mon-Sat 10am-9pm',
-    menu: [{ name: 'Classic Banh Mi', price: 30000 }],
-    reviews: [
+    openingHours: 'Mon-Sat 10am-9pm',
+    menuItems: [{ itemName: 'Classic Banh Mi', itemPrice: 30000 }],
+    customerReviews: [
       {
-        author: 'Alice B.',
-        rating: 4.8,
-        comment: 'Best Banh Mi!',
-        date: '2024-07-24'
+        reviewUserName: 'Alice B.',
+        userRating: 4.8,
+        userReview: 'Best Banh Mi!',
+        reviewDate: '2024-07-24'
       }
     ],
     mapUrl: 'https://maps.google.com/?q=789+Banh+Mi+Blvd'
   },
   {
-    id: '4',
-    name: 'Sushi Street',
-    rating: 4.88,
-    description:
+    restaurantId: '4',
+    restaurantRatingCount: 180,
+    restaurantName: 'Sushi Street',
+    restaurantRating: 4.88,
+    restaurantDescription:
       'Fresh sushi and sashimi platters made to order. Great for quick bites or sushi fans.',
     priceLevel: 3,
     distance: 2.3,
-    imageUrl: 'https://placehold.co/400x200',
-    compatibility: 85,
+    avatarUrl: 'https://placehold.co/400x200',
+    score: 85,
     address: '101 Sushi Ln, City',
-    hours: 'Tue-Sun 12pm-10pm',
-    menu: [{ name: 'Sushi Platter', price: 150000 }],
-    reviews: [
+    openingHours: 'Tue-Sun 12pm-10pm',
+    menuItems: [{ itemName: 'Sushi Platter', itemPrice: 150000 }],
+    customerReviews: [
       {
-        author: 'Bob C.',
-        rating: 4.9,
-        comment: 'So fresh!',
-        date: '2024-07-23'
+        reviewUserName: 'Bob C.',
+        userRating: 4.9,
+        userReview: 'So fresh!',
+        reviewDate: '2024-07-23'
       }
     ],
     mapUrl: 'https://maps.google.com/?q=101+Sushi+Ln'
