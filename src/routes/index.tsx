@@ -31,7 +31,7 @@ export default function Routes() {
       <Route path={withPrefix('')} Component={MainLayout}>
         <Route
           path={PageURLs.ofHome()}
-          element={<WithGuard Page={HomePage} Guard={NonLoginGuard} />}
+          element={<WithGuard Page={HomePage} Guard={AuthGuard} />}
         />
         <Route
           path={PageURLs.ofSearch()}

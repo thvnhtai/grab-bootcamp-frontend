@@ -1,23 +1,43 @@
 /** @jsxImportSource @emotion/react */
-import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  CalendarOutlined,
+  LockOutlined,
+  MailOutlined,
+  UserOutlined
+} from '@ant-design/icons';
 import { css } from '@emotion/react';
-import { Divider, Form, Tabs, Typography } from 'antd';
+import {
+  DatePicker,
+  Divider,
+  Form,
+  message,
+  Select,
+  Tabs,
+  Typography
+} from 'antd';
 import { Rule } from 'antd/es/form';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { FormField } from '../../components/FormField';
 import { GoogleIcon } from '../../components/static/GoogleIcon';
 import Logo from '../../components/static/Logo';
+import { MESSAGE } from '../../constants/message.constant';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { login, signup, watchAuthLoading } from '../../redux/slices/authSlice';
 
 type TabKey = 'signin' | 'signup';
 
 const { Text } = Typography;
+const { Option } = Select;
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('signin');
-  const [loading, setLoading] = useState(false);
   const [signinForm] = Form.useForm();
   const [signupForm] = Form.useForm();
+  const dispatch = useAppDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
+  const isLoading = useAppSelector(watchAuthLoading);
 
   const nameRules: Rule[] = [
     { required: true, message: 'Please enter your name' }
@@ -35,26 +55,42 @@ const AuthPage = () => {
   ];
 
   const passwordRules: Rule[] = [
-    { required: true, message: 'Please enter your password' }
+    { required: true, message: 'Please enter your password' },
+    {
+      min: 6,
+      message: 'Password must be at least 6 characters'
+    }
+  ];
+
+  const genderRules: Rule[] = [
+    { required: true, message: 'Please select your gender' }
+  ];
+
+  const dobRules: Rule[] = [
+    { required: true, message: 'Please select your date of birth' }
   ];
 
   const handleSignIn = async () => {
     try {
-      setLoading(true);
-      console.log('Sign In submit', signinForm.getFieldsValue());
+      await dispatch(login(signinForm.getFieldsValue())).unwrap();
     } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      console.error('Login process failed:', error);
+      messageApi.error((error as Error).message || MESSAGE.LOGIN_FAILED);
     }
   };
 
   const handleSignUp = async () => {
     try {
-      setLoading(true);
-      console.log('Sign Up submit', signupForm.getFieldsValue());
-    } finally {
-      setLoading(false);
+      const values = signupForm.getFieldsValue();
+      const formattedValues = {
+        ...values,
+        dateOfBirth: dayjs(values.dateOfBirth).format('YYYY-MM-DD')
+      };
+      await dispatch(signup(formattedValues)).unwrap();
+      messageApi.success('Account created successfully! Fetching profile...');
+    } catch (error) {
+      console.error('Signup process failed:', error);
+      messageApi.error((error as Error).message || MESSAGE.SIGNUP_FAILED);
     }
   };
 
@@ -64,6 +100,7 @@ const AuthPage = () => {
 
   return (
     <div css={styles.pageContainer}>
+      {contextHolder}
       <main css={styles.contentWrapper}>
         <div css={styles.card}>
           <div css={styles.cardOverlay}></div>
@@ -113,7 +150,7 @@ const AuthPage = () => {
                           htmlType='submit'
                           variant='solid'
                           css={styles.fullWidthButton}
-                          loading={loading}
+                          loading={isLoading}
                           style={{ marginTop: '1rem' }}
                         >
                           Log In
@@ -133,7 +170,7 @@ const AuthPage = () => {
                       requiredMark={false}
                     >
                       <FormField
-                        name='name'
+                        name='username'
                         rules={nameRules}
                         prefixIcon={<UserOutlined />}
                         placeholder='e.g. John Doe'
@@ -148,15 +185,31 @@ const AuthPage = () => {
                         name='password'
                         rules={passwordRules}
                         prefixIcon={<LockOutlined />}
-                        placeholder='At least 8 characters'
+                        placeholder='At least 6 characters'
                         password
                       />
+                      <Form.Item name='gender' rules={genderRules}>
+                        <Select placeholder='Select your gender' size='large'>
+                          <Option value='MALE'>Male</Option>
+                          <Option value='FEMALE'>Female</Option>
+                        </Select>
+                      </Form.Item>
+                      <Form.Item name='dateOfBirth' rules={dobRules}>
+                        <DatePicker
+                          placeholder='Select your date of birth'
+                          size='large'
+                          css={styles.fullWidthInput}
+                          format='YYYY-MM-DD'
+                          picker='date'
+                          suffixIcon={<CalendarOutlined />}
+                        />
+                      </Form.Item>
                       <Form.Item>
                         <Button
                           htmlType='submit'
                           variant='solid'
                           css={styles.fullWidthButton}
-                          loading={loading}
+                          loading={isLoading}
                           style={{ marginTop: '1rem' }}
                         >
                           Create Account
@@ -221,6 +274,7 @@ const styles = {
     background-image: url('https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=2070');
     background-size: cover;
     background-position: center;
+    transition: all 0.3s ease;
   `,
 
   cardOverlay: css`
@@ -258,6 +312,10 @@ const styles = {
 
   subtitle: css`
     color: var(--text-secondary-1);
+  `,
+
+  fullWidthInput: css`
+    width: 100%;
   `,
 
   fullWidthButton: css`

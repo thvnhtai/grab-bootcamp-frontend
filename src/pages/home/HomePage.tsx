@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { ArrowRightOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { css, keyframes } from '@emotion/react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import RestaurantList from '../../components/RestaurantList';
 import { sampleData } from '../../constants/data.constant';
@@ -16,6 +17,10 @@ const scaleIn = keyframes`
 `;
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const handleGetStarted = () => {
+    navigate('/search');
+  };
   return (
     <main css={mainStyle}>
       {/* Hero Section */}
@@ -45,6 +50,7 @@ export default function HomePage() {
                 padding: 1.5rem;
                 font-size: 1.125rem;
               `}
+              onClick={handleGetStarted}
             >
               Get Started
               <ArrowRightOutlined

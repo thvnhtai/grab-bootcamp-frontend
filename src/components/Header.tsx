@@ -2,29 +2,34 @@
 import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 import { css } from '@emotion/react';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
-import { Col, Drawer, Dropdown, Menu, Row, MenuProps } from 'antd';
+import { Col, Drawer, Dropdown, Menu, MenuProps, Row } from 'antd';
 import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { logout } from '../redux/slices/authSlice';
+import { PageURLs } from '../utils/navigate';
 import { Button } from './Button';
 import Logo from './static/Logo';
-import { PageURLs } from '../utils/navigate';
 
 const Header = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const dispatch = useAppDispatch();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await dispatch(logout()).unwrap();
   };
 
   const menuItems: MenuProps['items'] = [
     {
       key: 'user',
-      label: <span style={{ fontWeight: 500 }}>{user?.fullName}</span>,
+      label: (
+        <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+          {user?.username}
+        </span>
+      ),
       disabled: true
     },
     {
@@ -34,7 +39,8 @@ const Header = () => {
       key: 'logout',
       label: 'Log Out',
       icon: <LogoutOutlined />,
-      onClick: handleLogout
+      onClick: handleLogout,
+      danger: true
     }
   ];
 
@@ -143,7 +149,9 @@ const Header = () => {
           <Menu.Divider />
           {isAuthenticated ? (
             <>
-              <Menu.Item disabled>{user?.fullName}</Menu.Item>
+              <Menu.Item disabled style={{ color: 'var(--text-primary)' }}>
+                {user?.username}
+              </Menu.Item>
               <Menu.Item
                 key='logout'
                 icon={<LogoutOutlined />}

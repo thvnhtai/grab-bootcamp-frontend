@@ -1,12 +1,12 @@
 export const MESSAGE = {
-  LOGIN_SUCCESS: 'Đăng nhập thành công!',
-  LOGIN_FAILED: 'Đăng nhập thất bại!',
-  LOGIN_INVALID: 'Tài khoản hoặc mật khẩu không đúng!',
-  LOGIN_EXPIRED: 'Phiên đăng nhập đã hết hạn!',
+  LOGIN_SUCCESS: 'Login successful!',
+  LOGIN_FAILED: 'Login failed!',
+  LOGIN_INVALID: 'Invalid username or password!',
+  LOGIN_EXPIRED: 'Login session has expired!',
 
-  REGISTER_SUCCESS: 'Tạo tài khoản thành công!',
-  REGISTER_FAILED: 'Tạo tài khoản thất bại!',
+  SIGNUP_SUCCESS: 'Account created successfully!',
+  SIGNUP_FAILED: 'Account creation failed!',
 
-  LOGOUT_SUCCESS: 'Đăng xuất thành công!',
-  LOGOUT_FAILED: 'Đăng xuất thất bại!'
+  LOGOUT_SUCCESS: 'Logout successful!',
+  LOGOUT_FAILED: 'Logout failed!'
 };
