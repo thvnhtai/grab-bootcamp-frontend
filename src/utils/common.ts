@@ -31,7 +31,9 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-export const formatScorePercentage = (score: number | null | undefined): string => {
+export const formatScorePercentage = (
+  score: number | null | undefined
+): string => {
   const value = (score ?? 0) * 100;
   return `${value.toFixed(1)}%`;
 };
@@ -63,4 +65,24 @@ export function camelCase(str: string): string {
   return str.replace(/([-_][a-z])/g, (group) =>
     group.toUpperCase().replace('-', '').replace('_', '')
   );
+}
+
+export function snakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, (group) => `_${group.toLowerCase()}`)
+    .replace(/^_/, '');
+}
+
+export function snakeObject<T>(obj: T): T {
+  if (Array.isArray(obj)) {
+    return obj.map(snakeObject) as T;
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>).map(([key, value]) => [
+        snakeCase(key),
+        snakeObject(value)
+      ])
+    ) as T;
+  }
+  return obj;
 }
