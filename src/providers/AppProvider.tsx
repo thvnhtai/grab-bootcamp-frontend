@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { store } from '../redux/store';
 import { AuthProvider } from './AuthProvider';
 import { ContextProvider } from './ContextProvider';
+import { NotificationProvider } from './NotificationProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +32,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }}
         >
           <Provider store={store}>
-            <AuthProvider>{children}</AuthProvider>
+            <NotificationProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </NotificationProvider>
           </Provider>
         </ConfigProvider>
         <ReactQueryDevtools initialIsOpen={false} />
