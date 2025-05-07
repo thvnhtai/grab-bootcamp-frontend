@@ -1,242 +1,162 @@
 /** @jsxImportSource @emotion/react */
-import {
-  CalendarOutlined,
-  LockOutlined,
-  MailOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+
 import { css } from '@emotion/react';
-import {
-  DatePicker,
-  Divider,
-  Form,
-  message,
-  Select,
-  Tabs,
-  Typography
-} from 'antd';
+import { Divider, Form, Tabs, Typography } from 'antd';
 import { Rule } from 'antd/es/form';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '../../components/Button';
-import { FormField } from '../../components/FormField';
 import { GoogleIcon } from '../../components/static/GoogleIcon';
 import Logo from '../../components/static/Logo';
-import { MESSAGE } from '../../constants/message.constant';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { login, signup, watchAuthLoading } from '../../redux/slices/authSlice';
+import { setMessages } from '../../redux/slices/appSlice';
+import {
+  login,
+  selectAuthLoading,
+  selectAuthMessage,
+  signup
+} from '../../redux/slices/authSlice';
+import {
+  LoginCredentials,
+  SignupCredentials,
+  Styles
+} from '../../types/common';
+
+const SignInForm = lazy(() => import('../../components/forms/SignInForm'));
+const SignUpForm = lazy(() => import('../../components/forms/SignUpForm'));
 
 type TabKey = 'signin' | 'signup';
 
-const { Text } = Typography;
-const { Option } = Select;
+const FORM_RULES: Record<string, Rule[]> = {
+  name: [
+    { required: true, message: 'Please enter your name' },
+    { min: 3, message: 'Name must be at least 3 characters' },
+    { max: 50, message: 'Name must be at most 50 characters' }
+  ],
+  email: [
+    { required: true, message: 'Please enter your email' },
+    { type: 'email', message: 'Please enter a valid email' }
+  ],
+  password: [
+    { required: true, message: 'Please enter your password' },
+    { min: 6, message: 'Password must be at least 6 characters' }
+  ],
+  gender: [{ required: true, message: 'Please select your gender' }],
+  dob: [{ required: true, message: 'Please select your date of birth' }]
+} as const;
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('signin');
   const [signinForm] = Form.useForm();
   const [signupForm] = Form.useForm();
   const dispatch = useAppDispatch();
-  const [messageApi, contextHolder] = message.useMessage();
-  const isLoading = useAppSelector(watchAuthLoading);
+  const isLoading = useAppSelector(selectAuthLoading);
+  const messageInfo = useAppSelector(selectAuthMessage);
 
-  const nameRules: Rule[] = [
-    { required: true, message: 'Please enter your name' }
-  ];
+  const handleSignIn = useCallback(async () => {
+    await signinForm.validateFields();
+    await dispatch(
+      login(signinForm.getFieldsValue() as LoginCredentials)
+    ).unwrap();
+  }, [dispatch, signinForm]);
 
-  const emailRules: Rule[] = [
-    {
-      required: true,
-      message: 'Please enter your email'
-    },
-    {
-      type: 'email',
-      message: 'Please enter a valid email'
+  const handleSignUp = useCallback(async () => {
+    await signupForm.validateFields();
+    const values = signupForm.getFieldsValue() as SignupCredentials;
+    const formattedValues = {
+      ...values,
+      dateOfBirth: dayjs(values.dateOfBirth).format('YYYY-MM-DD')
+    };
+    await dispatch(signup(formattedValues)).unwrap();
+  }, [dispatch, signupForm]);
+
+  const handleGoogleLogin = useCallback(() => {
+    console.log('Google login initiated');
+  }, []);
+
+  useEffect(() => {
+    if (messageInfo) {
+      dispatch(
+        setMessages([
+          {
+            type: messageInfo?.type,
+            message: messageInfo?.message,
+            description: messageInfo?.description
+          }
+        ])
+      );
     }
-  ];
+  }, [dispatch, messageInfo]);
 
-  const passwordRules: Rule[] = [
-    { required: true, message: 'Please enter your password' },
-    {
-      min: 6,
-      message: 'Password must be at least 6 characters'
-    }
-  ];
-
-  const genderRules: Rule[] = [
-    { required: true, message: 'Please select your gender' }
-  ];
-
-  const dobRules: Rule[] = [
-    { required: true, message: 'Please select your date of birth' }
-  ];
-
-  const handleSignIn = async () => {
-    try {
-      await dispatch(login(signinForm.getFieldsValue())).unwrap();
-    } catch (error) {
-      console.error('Login process failed:', error);
-      messageApi.error((error as Error).message || MESSAGE.LOGIN_FAILED);
-    }
-  };
-
-  const handleSignUp = async () => {
-    try {
-      const values = signupForm.getFieldsValue();
-      const formattedValues = {
-        ...values,
-        dateOfBirth: dayjs(values.dateOfBirth).format('YYYY-MM-DD')
-      };
-      await dispatch(signup(formattedValues)).unwrap();
-      messageApi.success('Account created successfully! Fetching profile...');
-    } catch (error) {
-      console.error('Signup process failed:', error);
-      messageApi.error((error as Error).message || MESSAGE.SIGNUP_FAILED);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    console.log('Google login clicked');
-  };
+  const tabItems = useMemo(
+    () => [
+      {
+        key: 'signin',
+        label: 'Sign In',
+        children: (
+          <SignInForm
+            form={signinForm}
+            onFinish={handleSignIn}
+            isLoading={isLoading}
+            rules={FORM_RULES}
+            styles={styles}
+          />
+        )
+      },
+      {
+        key: 'signup',
+        label: 'Sign Up',
+        children: (
+          <SignUpForm
+            form={signupForm}
+            onFinish={handleSignUp}
+            isLoading={isLoading}
+            rules={FORM_RULES}
+            styles={styles}
+          />
+        )
+      }
+    ],
+    [handleSignIn, handleSignUp, isLoading, signinForm, signupForm]
+  );
 
   return (
     <div css={styles.pageContainer}>
-      {contextHolder}
       <main css={styles.contentWrapper}>
-        <div css={styles.card}>
-          <div css={styles.cardOverlay}></div>
+        <section css={styles.card}>
+          <div css={styles.cardOverlay} />
           <div css={styles.cardContent}>
-            <div css={styles.headerWrapper}>
-              <div>
-                <Logo />
-              </div>
-              <Text css={styles.subtitle}>
+            <header css={styles.headerWrapper}>
+              <Logo />
+              <Typography.Text css={styles.subtitle}>
                 {activeTab === 'signin'
                   ? 'Sign in to your account to continue'
                   : 'Create an account to get started'}
-              </Text>
-            </div>
+              </Typography.Text>
+            </header>
 
             <Tabs
               activeKey={activeTab}
               onChange={(key: string) => setActiveTab(key as TabKey)}
               centered
-              items={[
-                {
-                  key: 'signin',
-                  label: 'Sign In',
-                  children: (
-                    <Form
-                      form={signinForm}
-                      layout='vertical'
-                      onFinish={handleSignIn}
-                      requiredMark={false}
-                    >
-                      <FormField
-                        name='email'
-                        rules={emailRules}
-                        prefixIcon={<MailOutlined />}
-                        placeholder='Enter your email'
-                      />
-                      <FormField
-                        name='password'
-                        rules={passwordRules}
-                        prefixIcon={<LockOutlined />}
-                        placeholder='Enter your password'
-                        password
-                      />
-
-                      <Form.Item>
-                        <Button
-                          htmlType='submit'
-                          variant='solid'
-                          css={styles.fullWidthButton}
-                          loading={isLoading}
-                          style={{ marginTop: '1rem' }}
-                        >
-                          Log In
-                        </Button>
-                      </Form.Item>
-                    </Form>
-                  )
-                },
-                {
-                  key: 'signup',
-                  label: 'Sign Up',
-                  children: (
-                    <Form
-                      form={signupForm}
-                      layout='vertical'
-                      onFinish={handleSignUp}
-                      requiredMark={false}
-                    >
-                      <FormField
-                        name='username'
-                        rules={nameRules}
-                        prefixIcon={<UserOutlined />}
-                        placeholder='e.g. John Doe'
-                      />
-                      <FormField
-                        name='email'
-                        rules={emailRules}
-                        prefixIcon={<MailOutlined />}
-                        placeholder='e.g. your@email.com'
-                      />
-                      <FormField
-                        name='password'
-                        rules={passwordRules}
-                        prefixIcon={<LockOutlined />}
-                        placeholder='At least 6 characters'
-                        password
-                      />
-                      <Form.Item name='gender' rules={genderRules}>
-                        <Select placeholder='Select your gender' size='large'>
-                          <Option value='MALE'>Male</Option>
-                          <Option value='FEMALE'>Female</Option>
-                        </Select>
-                      </Form.Item>
-                      <Form.Item name='dateOfBirth' rules={dobRules}>
-                        <DatePicker
-                          placeholder='Select your date of birth'
-                          size='large'
-                          css={styles.fullWidthInput}
-                          format='YYYY-MM-DD'
-                          picker='date'
-                          suffixIcon={<CalendarOutlined />}
-                        />
-                      </Form.Item>
-                      <Form.Item>
-                        <Button
-                          htmlType='submit'
-                          variant='solid'
-                          css={styles.fullWidthButton}
-                          loading={isLoading}
-                          style={{ marginTop: '1rem' }}
-                        >
-                          Create Account
-                        </Button>
-                      </Form.Item>
-                    </Form>
-                  )
-                }
-              ]}
+              items={tabItems}
             />
 
             <Divider css={styles.divider}>
-              <div>
-                <span>or</span>
-              </div>
+              <Typography.Text type='secondary'>or</Typography.Text>
             </Divider>
 
             <Button
               variant='outlined'
               css={styles.fullWidthButton}
               onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
               <GoogleIcon />
               <span>Continue with Google</span>
             </Button>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
@@ -244,24 +164,20 @@ const AuthPage = () => {
 
 export default AuthPage;
 
-const styles = {
+const styles: Styles = {
   pageContainer: css`
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background: var(--bg-secondary-1);
-    overflow: hidden;
   `,
-
   contentWrapper: css`
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    overflow: auto;
   `,
-
   card: css`
     width: 100%;
     max-width: 28rem;
@@ -270,66 +186,40 @@ const styles = {
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     padding: 2rem;
     position: relative;
-    overflow: hidden;
     background-image: url('https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=2070');
     background-size: cover;
     background-position: center;
-    transition: all 0.3s ease;
   `,
-
   cardOverlay: css`
     position: absolute;
     inset: 0;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(4px);
   `,
-
   cardContent: css`
     position: relative;
-    z-index: 10;
+    z-index: 1;
   `,
-
   headerWrapper: css`
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   `,
-
-  heading: css`
-    font-size: 1.875rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    font-family: 'Lobster', sans-serif;
-  `,
-
-  branding: css`
-    .secondary {
-      color: var(--text-secondary-1);
-    }
-    .primary {
-      color: var(--primary-color);
-    }
-  `,
-
   subtitle: css`
     color: var(--text-secondary-1);
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
   `,
-
   fullWidthInput: css`
     width: 100%;
   `,
-
   fullWidthButton: css`
     width: 100%;
-    padding: 1.4rem;
+    padding: 1.2rem;
     font-size: 1rem;
     border-radius: 0.5rem;
   `,
-
   divider: css`
-    span {
-      font-size: 0.875rem;
-      font-weight: 400;
-      color: var(--text-inactive);
-    }
+    margin: 1.5rem 0;
   `
 };

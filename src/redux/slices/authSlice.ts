@@ -1,20 +1,33 @@
 import { MESSAGE } from '../../constants/message.constant';
 import { Message } from '../../enums/message.enum';
-import { createAppSlice } from '../createAppSlice';
+import {
+  ErrorPayload,
+  LoginCredentials,
+  MessageType,
+  SignupCredentials
+} from '../../types/common';
 import { snakeObject } from '../../utils/common';
+import { createAppSlice } from '../createAppSlice';
 
-export type AuthSliceState = {
-  loading: boolean;
-  profileLoading: boolean;
+interface AuthState {
+  isLoading: boolean;
   isAuthenticated: boolean;
   user?: User;
   message?: MessageType;
+}
+
+const initialState: AuthState = {
+  isLoading: false,
+  isAuthenticated: false,
+  user: undefined,
+  message: undefined
 };
 
-const initialState: AuthSliceState = {
-  loading: false,
-  profileLoading: true,
-  isAuthenticated: false
+const clearAuthState = (state: AuthState) => {
+  state.isLoading = false;
+  state.isAuthenticated = false;
+  state.user = undefined;
+  localStorage.removeItem('access_token');
 };
 
 export const authSlice = createAppSlice({
@@ -22,170 +35,167 @@ export const authSlice = createAppSlice({
   initialState,
   reducers: (create) => ({
     login: create.asyncThunk(
-      async (
-        credentials: { email: string; password: string },
-        { dispatch }
-      ) => {
-        const response = await apiService.post<{ access_token: string }>(
-          'auth/login',
-          credentials
-        );
-        localStorage.setItem('access_token', response.data.access_token);
-        await dispatch(getUserProfile()).unwrap();
-        return response;
+      async (credentials: LoginCredentials, { dispatch, rejectWithValue }) => {
+        try {
+          const response = await apiService.post('auth/login', credentials);
+          localStorage.setItem('access_token', response.data.access_token);
+          await dispatch(getUserProfile()).unwrap();
+          return response.data;
+        } catch (error) {
+          return rejectWithValue((error as { data: ErrorPayload }).data);
+        }
       },
       {
         pending: (state) => {
-          state.loading = true;
-          state.profileLoading = true;
+          state.isLoading = true;
           state.message = undefined;
         },
-        fulfilled: (state) => {
+        fulfilled: (state, action) => {
+          state.isLoading = false;
+          state.isAuthenticated = true;
           state.message = {
             type: Message.SUCCESS,
-            message: MESSAGE.LOGIN_SUCCESS
-          };
-        },
-        rejected: (state, action) => {
-          state.loading = false;
-          state.profileLoading = false;
-          state.isAuthenticated = false;
-          state.user = undefined;
-          localStorage.removeItem('access_token');
-          state.message = {
-            type: Message.ERROR,
-            message: (action.error?.message as string) || MESSAGE.LOGIN_FAILED
+            message: MESSAGE.LOGIN_SUCCESS,
+            description: action.payload.message
           };
         }
       }
     ),
+
     signup: create.asyncThunk(
-      async (
-        credentials: {
-          username: string;
-          email: string;
-          password: string;
-          gender: 'MALE' | 'FEMALE';
-          dateOfBirth: string;
-        },
-        { dispatch }
-      ) => {
-        const snakeCredentials = snakeObject(credentials);
-        const response = await apiService.post<{ access_token: string }>(
-          'auth/signup',
-          snakeCredentials
-        );
-        localStorage.setItem('access_token', response.data.access_token);
-        await dispatch(getUserProfile()).unwrap();
-        return response;
+      async (credentials: SignupCredentials, { dispatch, rejectWithValue }) => {
+        try {
+          const snakeCredentials = snakeObject(credentials);
+          const response = await apiService.post(
+            'auth/signup',
+            snakeCredentials
+          );
+          localStorage.setItem('access_token', response.data.access_token);
+          await dispatch(getUserProfile()).unwrap();
+          return response.data;
+        } catch (error) {
+          return rejectWithValue((error as { data: ErrorPayload }).data);
+        }
       },
       {
         pending: (state) => {
-          state.loading = true;
-          state.profileLoading = true;
+          state.isLoading = true;
           state.message = undefined;
         },
         fulfilled: (state) => {
+          state.isLoading = false;
+          state.isAuthenticated = true;
           state.message = {
             type: Message.SUCCESS,
             message: MESSAGE.SIGNUP_SUCCESS
           };
-        },
-        rejected: (state, action) => {
-          state.loading = false;
-          state.profileLoading = false;
-          state.isAuthenticated = false;
-          state.user = undefined;
-          localStorage.removeItem('access_token');
-          state.message = {
-            type: Message.ERROR,
-            message: (action.error?.message as string) || MESSAGE.SIGNUP_FAILED
-          };
         }
       }
     ),
+
     logout: create.asyncThunk(
-      async () => {
-        await apiService.post('auth/logout');
-        localStorage.removeItem('access_token');
+      async (_, { rejectWithValue }) => {
+        try {
+          await apiService.post('auth/logout');
+          localStorage.removeItem('access_token');
+          return null;
+        } catch (error) {
+          return rejectWithValue((error as { data: ErrorPayload }).data);
+        }
       },
       {
         pending: (state) => {
-          state.loading = true;
+          state.isLoading = true;
+          state.message = undefined;
         },
         fulfilled: (state) => {
-          state.loading = false;
-          state.isAuthenticated = false;
-          state.user = undefined;
-          state.profileLoading = false;
+          clearAuthState(state);
           state.message = {
             type: Message.SUCCESS,
             message: MESSAGE.LOGOUT_SUCCESS
           };
-        },
-        rejected: (state) => {
-          state.loading = false;
-          state.isAuthenticated = false;
-          state.user = undefined;
-          state.profileLoading = false;
-          localStorage.removeItem('access_token');
-          state.message = {
-            type: Message.ERROR,
-            message: MESSAGE.LOGOUT_FAILED
-          };
         }
       }
     ),
+
     getUserProfile: create.asyncThunk(
-      async () => {
-        const response = await apiService.get<User>('auth/profile');
-        return response;
+      async (_, { rejectWithValue }) => {
+        try {
+          const response = await apiService.get<User>('auth/profile');
+          return response.data;
+        } catch (error) {
+          return rejectWithValue((error as { data: ErrorPayload }).data);
+        }
       },
       {
         pending: (state) => {
-          state.profileLoading = true;
-          state.loading = true;
+          state.isLoading = true;
           state.message = undefined;
         },
         fulfilled: (state, action) => {
-          state.profileLoading = false;
-          state.loading = false;
+          state.isLoading = false;
           state.isAuthenticated = true;
-          state.user = action.payload.data;
-        },
-        rejected: (state, action) => {
-          state.profileLoading = false;
-          state.loading = false;
-          state.isAuthenticated = false;
-          state.user = undefined;
-          localStorage.removeItem('access_token');
-          state.message = {
-            type: Message.ERROR,
-            message:
-              (action.error?.message as string) || 'Failed to fetch profile.'
-          };
+          state.user = action.payload;
         }
       }
     )
   }),
 
+  extraReducers: (builder) => {
+    builder
+      .addCase(login.rejected, (state, action) => {
+        clearAuthState(state);
+        state.message = {
+          type: Message.ERROR,
+          message: MESSAGE.LOGIN_FAILED,
+          description:
+            (action.payload as ErrorPayload)?.message || MESSAGE.LOGIN_INVALID
+        };
+      })
+      .addCase(signup.rejected, (state, action) => {
+        clearAuthState(state);
+        state.message = {
+          type: Message.ERROR,
+          message: MESSAGE.SIGNUP_FAILED,
+          description:
+            (action.payload as ErrorPayload)?.message || MESSAGE.SIGNUP_FAILED
+        };
+      })
+      .addCase(logout.rejected, (state, action) => {
+        clearAuthState(state);
+        state.message = {
+          type: Message.ERROR,
+          message: MESSAGE.LOGOUT_FAILED,
+          description:
+            (action.payload as ErrorPayload)?.message || MESSAGE.LOGOUT_FAILED
+        };
+      })
+      .addCase(getUserProfile.rejected, (state) => {
+        clearAuthState(state);
+        // Optionally add error message if needed
+        // state.message = {
+        //   type: Message.ERROR,
+        //   message: MESSAGE.PROFILE_FAILED,
+        //   description: 'Failed to fetch user profile',
+        // };
+      });
+  },
+
   selectors: {
-    watchUser: (auth) => auth.user,
-    watchAuthState: (auth) => auth,
-    watchAuthMessage: (auth) => auth.message,
-    watchAuthLoading: (auth) => auth.loading || auth.profileLoading,
-    watchProfileLoading: (auth) => auth.profileLoading,
-    watchLoggedIn: (auth) => auth.isAuthenticated
+    selectUser: (state: AuthState) => state.user,
+    selectAuthState: (state: AuthState) => state,
+    selectAuthMessage: (state: AuthState) => state.message,
+    selectAuthLoading: (state: AuthState) => state.isLoading,
+    selectIsAuthenticated: (state: AuthState) => state.isAuthenticated
   }
 });
 
 export const {
-  watchUser,
-  watchAuthState,
-  watchAuthMessage,
-  watchLoggedIn,
-  watchAuthLoading,
-  watchProfileLoading
+  selectUser,
+  selectAuthState,
+  selectAuthMessage,
+  selectAuthLoading,
+  selectIsAuthenticated
 } = authSlice.selectors;
 
 export const { login, signup, logout, getUserProfile } = authSlice.actions;

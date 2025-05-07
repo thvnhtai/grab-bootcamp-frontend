@@ -2,6 +2,7 @@
 import { TagOutlined } from '@ant-design/icons';
 import { css } from '@emotion/react';
 import { Flex, Typography } from 'antd';
+import { Styles } from '../types/common';
 
 const { Text } = Typography;
 

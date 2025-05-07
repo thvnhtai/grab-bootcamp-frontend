@@ -4,9 +4,10 @@ import { css } from '@emotion/react';
 import { Flex, Input, Select, Slider } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from './Button';
+import { Filters as FiltersType, SortByOption } from '../types/common';
 
 type FiltersProps = {
-  onFilterChange: (filters: Filters) => void;
+  onFilterChange: (filters: FiltersType) => void;
 };
 
 const SORT_OPTIONS = [

@@ -1,3 +1,5 @@
+import { Message } from '../enums/message.enum';
+
 type RectSize = {
   width: number;
   height: number;
@@ -36,4 +38,22 @@ type ApiResponse<T> = {
     size: number;
     total: number;
   };
+};
+
+type ErrorPayload = {
+  status: number;
+  message: string;
+};
+
+type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+type SignupCredentials = {
+  username: string;
+  email: string;
+  password: string;
+  gender: 'MALE' | 'FEMALE';
+  dateOfBirth: string;
 };

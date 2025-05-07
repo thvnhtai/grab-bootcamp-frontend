@@ -8,6 +8,7 @@ import ImageUpload from '../../components/ImageUpload';
 import { STEP_CONFIG } from '../../constants/common.constant';
 import { useAnalyzeImage } from '../../hooks/useAnalyzeImage';
 import { PageURLs } from '../../utils/navigate';
+import { Styles } from '../../types/common';
 
 const { Title, Paragraph } = Typography;
 
