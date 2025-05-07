@@ -1,21 +1,13 @@
 import { MESSAGE } from '../../constants/message.constant';
 import { Message } from '../../enums/message.enum';
-import { ErrorPayload, MessageType } from '../../types/common';
+import {
+  ErrorPayload,
+  LoginCredentials,
+  MessageType,
+  SignupCredentials
+} from '../../types/common';
 import { snakeObject } from '../../utils/common';
 import { createAppSlice } from '../createAppSlice';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-interface SignupCredentials {
-  username: string;
-  email: string;
-  password: string;
-  gender: 'MALE' | 'FEMALE';
-  dateOfBirth: string;
-}
 
 interface AuthState {
   isLoading: boolean;

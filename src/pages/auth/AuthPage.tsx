@@ -1,17 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import {
-  CalendarOutlined,
-  LockOutlined,
-  MailOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+
 import { css } from '@emotion/react';
-import { DatePicker, Divider, Form, Select, Tabs, Typography } from 'antd';
+import { Divider, Form, Tabs, Typography } from 'antd';
 import { Rule } from 'antd/es/form';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '../../components/Button';
-import { FormField } from '../../components/FormField';
 import { GoogleIcon } from '../../components/static/GoogleIcon';
 import Logo from '../../components/static/Logo';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
@@ -22,7 +16,14 @@ import {
   selectAuthMessage,
   signup
 } from '../../redux/slices/authSlice';
-import { Styles } from '../../types/common';
+import {
+  LoginCredentials,
+  SignupCredentials,
+  Styles
+} from '../../types/common';
+
+const SignInForm = lazy(() => import('../../components/forms/SignInForm'));
+const SignUpForm = lazy(() => import('../../components/forms/SignUpForm'));
 
 type TabKey = 'signin' | 'signup';
 
@@ -54,12 +55,14 @@ const AuthPage = () => {
 
   const handleSignIn = useCallback(async () => {
     await signinForm.validateFields();
-    await dispatch(login(signinForm.getFieldsValue())).unwrap();
+    await dispatch(
+      login(signinForm.getFieldsValue() as LoginCredentials)
+    ).unwrap();
   }, [dispatch, signinForm]);
 
   const handleSignUp = useCallback(async () => {
     await signupForm.validateFields();
-    const values = signupForm.getFieldsValue();
+    const values = signupForm.getFieldsValue() as SignupCredentials;
     const formattedValues = {
       ...values,
       dateOfBirth: dayjs(values.dateOfBirth).format('YYYY-MM-DD')
@@ -76,9 +79,9 @@ const AuthPage = () => {
       dispatch(
         setMessages([
           {
-            type: messageInfo.type,
-            message: messageInfo.message,
-            description: messageInfo.description
+            type: messageInfo?.type,
+            message: messageInfo?.message,
+            description: messageInfo?.description
           }
         ])
       );
@@ -91,99 +94,26 @@ const AuthPage = () => {
         key: 'signin',
         label: 'Sign In',
         children: (
-          <Form
+          <SignInForm
             form={signinForm}
-            layout='vertical'
             onFinish={handleSignIn}
-            requiredMark={false}
-            disabled={isLoading}
-          >
-            <FormField
-              name='email'
-              rules={FORM_RULES.email}
-              prefixIcon={<MailOutlined />}
-              placeholder='Enter your email'
-            />
-            <FormField
-              name='password'
-              rules={FORM_RULES.password}
-              prefixIcon={<LockOutlined />}
-              placeholder='Enter your password'
-              password
-            />
-            <Form.Item>
-              <Button
-                htmlType='submit'
-                variant='solid'
-                css={styles.fullWidthButton}
-                loading={isLoading}
-              >
-                Log In
-              </Button>
-            </Form.Item>
-          </Form>
+            isLoading={isLoading}
+            rules={FORM_RULES}
+            styles={styles}
+          />
         )
       },
       {
         key: 'signup',
         label: 'Sign Up',
         children: (
-          <Form
+          <SignUpForm
             form={signupForm}
-            layout='vertical'
             onFinish={handleSignUp}
-            requiredMark={false}
-            disabled={isLoading}
-          >
-            <FormField
-              name='username'
-              rules={FORM_RULES.name}
-              prefixIcon={<UserOutlined />}
-              placeholder='e.g. John Doe'
-            />
-            <FormField
-              name='email'
-              rules={FORM_RULES.email}
-              prefixIcon={<MailOutlined />}
-              placeholder='e.g. your@email.com'
-            />
-            <FormField
-              name='password'
-              rules={FORM_RULES.password}
-              prefixIcon={<LockOutlined />}
-              placeholder='At least 6 characters'
-              password
-            />
-            <Form.Item name='gender' rules={FORM_RULES.gender}>
-              <Select placeholder='Select your gender' size='large'>
-                <Select.Option value='MALE'>Male</Select.Option>
-                <Select.Option value='FEMALE'>Female</Select.Option>
-              </Select>
-            </Form.Item>
-            <Form.Item name='dateOfBirth' rules={FORM_RULES.dob}>
-              <DatePicker
-                placeholder='Select your date of birth'
-                size='large'
-                css={styles.fullWidthInput}
-                format='YYYY-MM-DD'
-                picker='date'
-                suffixIcon={<CalendarOutlined />}
-                maxDate={dayjs()}
-                minDate={dayjs().subtract(100, 'year')}
-                allowClear
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                htmlType='submit'
-                variant='solid'
-                css={styles.fullWidthButton}
-                loading={isLoading}
-              >
-                Create Account
-              </Button>
-            </Form.Item>
-          </Form>
+            isLoading={isLoading}
+            rules={FORM_RULES}
+            styles={styles}
+          />
         )
       }
     ],

@@ -43,7 +43,6 @@ export const FormField = ({
 
 const inputStyles = {
   input: {
-    marginLeft: 8,
-    padding: 4
+    marginLeft: 8
   }
 };

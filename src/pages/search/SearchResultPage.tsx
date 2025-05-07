@@ -8,6 +8,7 @@ import Filters from '../../components/Filters';
 import RestaurantDetailModal from '../../components/RestaurantDetailModal';
 import RestaurantList from '../../components/RestaurantList';
 import { fetchRestaurantDetails } from '../../services/restaurant.service';
+import { Filters as FiltersType } from '../../types/common';
 import { Restaurant } from '../../types/restaurant';
 import { PageURLs } from '../../utils/navigate';
 
@@ -24,7 +25,7 @@ const SearchResultPage = () => {
     useState<Restaurant | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const [currentFilters, setCurrentFilters] = useState<Filters>({
+  const [currentFilters, setCurrentFilters] = useState<FiltersType>({
     searchTerm: '',
     sortBy: 'score',
     minRating: 0
@@ -49,7 +50,7 @@ const SearchResultPage = () => {
     }
   }, []);
 
-  const handleFilterChange = useCallback((filters: Filters) => {
+  const handleFilterChange = useCallback((filters: FiltersType) => {
     setCurrentFilters(filters);
   }, []);
 

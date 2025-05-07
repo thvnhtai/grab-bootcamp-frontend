@@ -44,3 +44,16 @@ type ErrorPayload = {
   status: number;
   message: string;
 };
+
+type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+type SignupCredentials = {
+  username: string;
+  email: string;
+  password: string;
+  gender: 'MALE' | 'FEMALE';
+  dateOfBirth: string;
+};

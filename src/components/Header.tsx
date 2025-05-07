@@ -10,6 +10,7 @@ import { logout } from '../redux/slices/authSlice';
 import { PageURLs } from '../utils/navigate';
 import { Button } from './Button';
 import Logo from './static/Logo';
+import { Styles } from '../types/common';
 
 const Header = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
