@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useEffect } from 'react';
 import { NotificationContext } from '../hooks/useNotification';
 import { useAppSelector } from '../redux/hooks';
 import { watchMessages } from '../redux/slices/appSlice';
-import { NotificationType } from '../types/common';
+import { NotificationType } from '../types/utility';
 
 type NotificationProviderProps = {
   children: ReactNode;

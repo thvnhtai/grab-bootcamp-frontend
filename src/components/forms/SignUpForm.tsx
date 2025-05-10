@@ -8,7 +8,7 @@ import {
 import { DatePicker, Form, FormInstance, Select } from 'antd';
 import { Rule } from 'antd/es/form';
 import dayjs from 'dayjs';
-import { Styles } from '../../types/common';
+import { Styles } from '../../types/utility';
 import { Button } from '../Button';
 import { FormField } from '../FormField';
 
