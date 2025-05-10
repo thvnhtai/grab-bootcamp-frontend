@@ -2,9 +2,9 @@
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
 import { Rule } from 'antd/es/form';
-import { Styles } from '../../types/common';
 import { Button } from '../Button';
 import { FormField } from '../FormField';
+import { Styles } from '../../types/utility';
 
 interface SignInFormProps {
   form: FormInstance;

@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import {
   ClockCircleOutlined,
   EnvironmentOutlined,
   StarFilled
 } from '@ant-design/icons';
-import { css } from '@emotion/react';
 import {
   Badge,
   Col,
@@ -20,24 +20,99 @@ import {
   Typography
 } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { DEFAULT_IMAGE } from '../constants/common.constant';
 import { PRICE_LEVEL } from '../constants/price.constants';
-import { fetchPaginatedData } from '../services/restaurant.service';
-import { MenuItem, Restaurant, Review } from '../types/restaurant';
 import { formatScorePercentage } from '../utils/common';
+import { fetchPaginatedData } from '../services/restaurant.service';
+
 import { Button } from './Button';
 import PriceLevelTag from './PriceLevelTag';
 
+import { MenuItem, Restaurant, Review } from '../types/restaurant';
+
+import { Styles } from '../types/utility';
+
 const { Title, Text, Paragraph } = Typography;
 
-interface Props {
+interface RestaurantDetailModalProps {
   data: Restaurant | null;
   isOpen: boolean;
   onClose: () => void;
   isLoading: boolean;
 }
 
-const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
+const styles: Styles = {
+  content: css`
+    padding: 1.5rem;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  `,
+  imageContainer: css`
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background-color: var(--bg-disabled);
+    height: 20rem;
+    width: 100%;
+  `,
+  image: css`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  `,
+  badgeRibbon: css`
+    .ant-ribbon-wrapper {
+      top: 10px;
+      right: 10px;
+    }
+  `,
+  sections: css`
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+  `,
+  section: css`
+    margin-bottom: 1.5rem;
+  `,
+  restaurantTitle: css`
+    margin-bottom: 0.5rem;
+  `,
+  sectionHeading: css`
+    margin-bottom: 1rem;
+  `,
+  icon: css`
+    font-size: 1.25rem;
+    color: var(--text-secondary-1);
+    margin-top: 0.35rem;
+  `,
+  price: css`
+    font-weight: 500;
+    margin-left: 1rem;
+    flex-shrink: 0;
+  `,
+  button: css`
+    flex: 1;
+    min-width: 100px;
+  `,
+  pagination: css`
+    margin-top: 1rem;
+  `,
+  reviewDate: css`
+    font-size: 0.875rem;
+  `,
+  reviewText: css`
+    font-size: 0.875rem;
+  `
+};
+
+const RestaurantDetailModal = ({
+  data,
+  isOpen,
+  onClose,
+  isLoading
+}: RestaurantDetailModalProps) => {
   const [menuPage, setMenuPage] = useState(1);
   const [reviewsPage, setReviewsPage] = useState(1);
   const [menuLoading, setMenuLoading] = useState(false);
@@ -45,26 +120,27 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [customerReviews, setCustomerReviews] = useState<Review[]>([]);
 
+  const priceConfig = useMemo(
+    () =>
+      data?.priceLevel
+        ? (PRICE_LEVEL[data.priceLevel] ?? { text: 'N/A', tooltip: '' })
+        : { text: 'N/A', tooltip: '' },
+    [data?.priceLevel]
+  );
+
   useEffect(() => {
     if (data) {
       setMenuItems(data.menuItems || []);
       setCustomerReviews(data.customerReviews || []);
       setMenuPage(1);
       setReviewsPage(1);
+    } else {
+      setMenuItems([]);
+      setCustomerReviews([]);
+      setMenuPage(1);
+      setReviewsPage(1);
     }
   }, [data]);
-
-  const priceConfig = useMemo(
-    () => ({
-      text: data?.priceLevel
-        ? (PRICE_LEVEL[data.priceLevel]?.text ?? 'N/A')
-        : 'N/A',
-      tooltip: data?.priceLevel
-        ? (PRICE_LEVEL[data.priceLevel]?.tooltip ?? '')
-        : ''
-    }),
-    [data?.priceLevel]
-  );
 
   const handleOpenMap = useCallback(
     (url?: string) => () => {
@@ -75,11 +151,16 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
 
   const handleMenuPageChange = useCallback(
     async (page: number) => {
-      if (!data?.restaurantId || !data?.dishesPagination) return;
+      if (!data?.restaurantId || !data?.dishesPagination) {
+        console.warn(
+          'Cannot fetch menu items: missing data or pagination info'
+        );
+        return;
+      }
 
       setMenuLoading(true);
       try {
-        const response = await fetchPaginatedData(
+        const response = await fetchPaginatedData<MenuItem>(
           `restaurant/${data.restaurantId}/dishes`,
           page,
           data.dishesPagination.size
@@ -97,11 +178,14 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
 
   const handleReviewsPageChange = useCallback(
     async (page: number) => {
-      if (!data?.restaurantId || !data?.reviewsPagination) return;
+      if (!data?.restaurantId || !data?.reviewsPagination) {
+        console.warn('Cannot fetch reviews: missing data or pagination info');
+        return;
+      }
 
       setReviewsLoading(true);
       try {
-        const response = await fetchPaginatedData(
+        const response = await fetchPaginatedData<Review>(
           `restaurant/${data.restaurantId}/reviews`,
           page,
           data.reviewsPagination.size
@@ -121,7 +205,12 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
     return (
       <Modal open={isOpen} onCancel={onClose} footer={null} centered>
         <Flex justify='center' align='center' style={{ minHeight: 300 }}>
-          <Spin size='large' />
+          <Spin
+            size='large'
+            tip={
+              isLoading ? 'Loading restaurant details...' : 'Preparing modal...'
+            }
+          />
         </Flex>
       </Modal>
     );
@@ -149,12 +238,24 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
       }
       centered
       width={700}
+      style={{ padding: 0 }}
     >
       <div css={styles.content}>
-        <Badge.Ribbon
-          text={`${formatScorePercentage(data.score)}% match`}
-          color='var(--primary-color)'
-        >
+        {data.score != null ? (
+          <Badge.Ribbon
+            text={`${formatScorePercentage(data.score)}% match`}
+            color='var(--primary-color)'
+            css={styles.badgeRibbon}
+          >
+            <section css={styles.imageContainer}>
+              <img
+                src={data.avatarUrl || DEFAULT_IMAGE}
+                alt={data.restaurantName || 'Restaurant'}
+                css={styles.image}
+              />
+            </section>
+          </Badge.Ribbon>
+        ) : (
           <section css={styles.imageContainer}>
             <img
               src={data.avatarUrl || DEFAULT_IMAGE}
@@ -162,11 +263,12 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
               css={styles.image}
             />
           </section>
-        </Badge.Ribbon>
+        )}
 
         <div css={styles.sections}>
+          {/* Basic Info Section */}
           <section css={styles.section}>
-            <Title level={3}>
+            <Title level={3} css={styles.restaurantTitle}>
               {data.restaurantName || 'Unnamed Restaurant'}
             </Title>
             <Flex gap={8} align='center'>
@@ -184,6 +286,7 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
             </Flex>
           </section>
 
+          {/* Location and Hours Section */}
           <section css={styles.section}>
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
@@ -194,7 +297,9 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
                     <Paragraph type='secondary' style={{ marginBottom: 0 }}>
                       {data.address || 'No address provided'}
                     </Paragraph>
-                    <Text type='secondary'>N/A km away</Text>
+                    <Text type='secondary'>
+                      {data.distance != null ? `${data.distance} km away` : ''}
+                    </Text>
                   </div>
                 </Space>
               </Col>
@@ -212,31 +317,37 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
             </Row>
           </section>
 
+          {/* About Section */}
           <section css={styles.section}>
-            <Title level={5}>About</Title>
+            <Title level={5} css={styles.sectionHeading}>
+              About
+            </Title>
             <Paragraph type='secondary'>
-              {data.restaurantDescription || 'No description provided.'}
+              {data.restaurantDescription || ''}
             </Paragraph>
           </section>
 
           <Divider />
 
+          {/* Menu Section */}
           <section css={styles.section}>
-            <Title level={5}>Menu Highlights</Title>
+            <Title level={5} css={styles.sectionHeading}>
+              Menu Highlights
+            </Title>
             {menuItems.length > 0 ? (
               <>
                 <List
                   itemLayout='horizontal'
                   dataSource={menuItems}
                   renderItem={(item) => (
-                    <List.Item>
+                    <List.Item key={item.itemName}>
                       <List.Item.Meta
                         title={<Text>{item.itemName || 'Unnamed Dish'}</Text>}
                         description={
                           item.itemDescription ? (
                             <Text type='secondary'>{item.itemDescription}</Text>
                           ) : (
-                            <Text type='secondary'>No description</Text>
+                            ''
                           )
                         }
                       />
@@ -267,8 +378,9 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
 
           <Divider />
 
+          {/* Reviews Section */}
           <section css={styles.section}>
-            <Title level={5}>
+            <Title level={5} css={styles.sectionHeading}>
               Customer Reviews ({data.restaurantRatingCount ?? 0})
             </Title>
             {customerReviews.length > 0 ? (
@@ -276,19 +388,21 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
                 <List
                   itemLayout='vertical'
                   dataSource={customerReviews}
-                  renderItem={(review) => (
-                    <List.Item>
+                  renderItem={(review, index) => (
+                    <List.Item key={review.reviewUserName || index}>
                       <List.Item.Meta
                         title={
-                          <Flex justify='space-between'>
-                            <Text>{review.reviewUserName || 'Anonymous'}</Text>
-                            <Text type='secondary'>
+                          <Flex justify='space-between' align='center'>
+                            <Text strong>
+                              {review.reviewUserName || 'Anonymous'}
+                            </Text>
+                            <Text type='secondary' css={styles.reviewDate}>
                               {review.reviewDate || 'Unknown date'}
                             </Text>
                           </Flex>
                         }
                         description={
-                          <Flex vertical gap={16}>
+                          <Flex vertical gap={8}>
                             <Rate
                               disabled
                               value={review.userRating ?? 0}
@@ -299,10 +413,11 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
                             <Paragraph
                               type='secondary'
                               ellipsis={{
-                                rows: 2,
+                                rows: 3,
                                 expandable: true,
                                 symbol: 'View more'
                               }}
+                              css={styles.reviewText}
                             >
                               {review.userReview || 'No comment provided'}
                             </Paragraph>
@@ -335,49 +450,6 @@ const RestaurantDetailModal = ({ data, isOpen, onClose, isLoading }: Props) => {
       </div>
     </Modal>
   );
-};
-
-const styles = {
-  content: css`
-    padding: 1.5rem;
-    max-height: 85vh;
-  `,
-  imageContainer: css`
-    border-radius: 0.5rem;
-    overflow: hidden;
-    margin-bottom: 1rem;
-    background-color: var(--bg-disabled);
-    height: 20rem;
-  `,
-  image: css`
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  `,
-  sections: css`
-    overflow-y: auto;
-    max-height: calc(85vh - 22rem);
-    padding-right: 1rem;
-  `,
-  section: css`
-    margin-bottom: 1.5rem;
-  `,
-  icon: css`
-    font-size: 1.25rem;
-    color: var(--text-secondary-1);
-    margin-top: 0.35rem;
-  `,
-  price: css`
-    font-weight: 500;
-    margin-left: 1rem;
-  `,
-  button: css`
-    width: 100%;
-    padding: 1.2rem;
-  `,
-  pagination: css`
-    margin-top: 1rem;
-  `
 };
 
 export default RestaurantDetailModal;

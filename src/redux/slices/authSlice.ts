@@ -1,11 +1,8 @@
 import { MESSAGE } from '../../constants/message.constant';
 import { Message } from '../../enums/message.enum';
-import {
-  ErrorPayload,
-  LoginCredentials,
-  MessageType,
-  SignupCredentials
-} from '../../types/common';
+import { ErrorPayload } from '../../types/api';
+import { LoginCredentials, SignupCredentials, User } from '../../types/auth';
+import { MessageType } from '../../types/utility';
 import { snakeObject } from '../../utils/common';
 import { createAppSlice } from '../createAppSlice';
 

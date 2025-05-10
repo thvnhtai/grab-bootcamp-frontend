@@ -1,31 +1,38 @@
-export interface MenuItem {
+import { Pagination } from './api';
+import { User } from './auth';
+
+type MenuItem = {
   itemName: string;
   itemPrice: string | number;
   itemDescription?: string;
   itemAvatarUrl?: string;
-}
+};
 
-export interface Review {
-  reviewUserName: string;
+type Review = {
+  reviewUserName: User['username'];
   userRating: number;
   userReview: string;
   reviewDate: string;
-}
+};
 
-export interface Pagination {
-  page: number;
-  size: number;
-  total: number;
-}
+type SortByOption = 'score' | 'rating' | 'distance';
 
-export interface Restaurant {
+type PriceLevel = 1 | 2 | 3;
+
+type Filters = {
+  sortBy: SortByOption;
+  minRating: number;
+  priceLevel?: PriceLevel[];
+};
+
+type Restaurant = {
   restaurantId: string;
   restaurantName: string;
   avatarUrl?: string;
   restaurantRating?: number;
   score: number;
   distance: number;
-  priceLevel: 1 | 2 | 3;
+  priceLevel: PriceLevel;
   address?: string;
   openingHours?: string;
   restaurantDescription?: string;
@@ -35,4 +42,6 @@ export interface Restaurant {
   mapUrl?: string;
   dishesPagination?: Pagination;
   reviewsPagination?: Pagination;
-}
+};
+
+export { MenuItem, Review, Restaurant, SortByOption, PriceLevel, Filters };

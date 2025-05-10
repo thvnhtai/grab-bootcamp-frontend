@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import {
   CameraOutlined,
   CloudUploadOutlined,
@@ -6,15 +7,117 @@ import {
   SyncOutlined,
   UploadOutlined
 } from '@ant-design/icons';
-import { css } from '@emotion/react';
 import { Card, Typography } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+
 import { fileToBase64 } from '../utils/common';
 import { Button } from './Button';
+import { Styles } from '../types/utility';
 
 interface ImageUploadProps {
-  onImageUpload: (file: File, previewUrl: string) => void;
+  onImageUpload: (file: File | null, previewUrl: string | null) => void;
 }
+
+const styles: Styles = {
+  card: css`
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 32rem;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--background-color);
+    transition: all 0.3s ease;
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  `,
+  uploadContainer: css`
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  `,
+  dragActive: css`
+    border-color: var(--primary-color);
+    background-color: rgba(0, 177, 79, 0.1);
+  `,
+  previewPadding: css`
+    padding: 1rem;
+  `,
+  uploadPadding: css`
+    padding: 2rem;
+  `,
+  previewWrapper: css`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  `,
+  previewImage: css`
+    width: 100%;
+    height: auto;
+    max-height: 16rem;
+    object-fit: contain;
+    border-radius: 0.25rem;
+  `,
+  buttonGroup: css`
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 0.5rem;
+    width: 100%;
+    flex-wrap: wrap;
+  `,
+  buttonPadding: css`
+    padding: 1.2rem;
+    flex-grow: 1;
+    justify-content: center;
+  `,
+  takePhotoButton: css`
+    color: var(--text-primary) !important;
+  `,
+  uploadIcon: css`
+    margin-bottom: 1rem;
+    color: var(--text-secondary-1);
+  `,
+  iconStyle: css`
+    font-size: 3rem;
+    color: var(--text-inactive);
+  `,
+  uploadHeading: css`
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  `,
+  uploadInstructions: css`
+    color: var(--text-inactive);
+    text-align: center;
+    margin-bottom: 1rem;
+  `,
+  buttonContainer: css`
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    @media (min-width: 640px) {
+      flex-direction: row;
+      justify-content: center;
+    }
+  `,
+  buttonIcon: css`
+    margin-right: 0.5rem;
+  `,
+  hiddenInput: css`
+    display: none;
+  `
+};
 
 export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -24,6 +127,10 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
   const handleFileChange = useCallback(
     async (file: File) => {
       try {
+        if (!file.type.startsWith('image/')) {
+          console.warn('Selected file is not an image:', file.type);
+          return;
+        }
         const base64 = await fileToBase64(file);
         setPreview(base64);
         onImageUpload(file, base64);
@@ -47,14 +154,9 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        const file = e.dataTransfer.files[0];
-        if (file.type.startsWith('image/')) {
-          handleFileChange(file);
-        } else {
-          console.warn('Dropped file is not an image:', file.type);
-        }
+      const file = e.dataTransfer.files?.[0];
+      if (file) {
+        handleFileChange(file);
       }
     },
     [handleFileChange]
@@ -66,9 +168,12 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
+      const file = e.target.files?.[0];
+      if (file) {
         handleFileChange(file);
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     },
     [handleFileChange]
@@ -76,7 +181,7 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
 
   const handleRemoveImage = useCallback(() => {
     setPreview(null);
-    onImageUpload(null as unknown as File, '');
+    onImageUpload(null, null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -157,112 +262,3 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
     </Card>
   );
 }
-
-const styles = {
-  card: css`
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 32rem;
-    margin: 0 auto;
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: var(--background-color);
-    transition: all 0.3s ease;
-    &:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-  `,
-
-  uploadContainer: css`
-    border-radius: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed var(--border-color);
-    transition: all 0.3s ease;
-  `,
-
-  dragActive: css`
-    border-color: #00b14f;
-    background-color: rgba(0, 177, 79, 0.1);
-  `,
-
-  previewPadding: css`
-    padding: 1rem;
-  `,
-
-  uploadPadding: css`
-    padding: 2rem;
-  `,
-
-  previewWrapper: css`
-    width: 100%;
-  `,
-
-  previewImage: css`
-    width: 100%;
-    height: auto;
-    max-height: 16rem;
-    display: flex;
-    margin: 0 auto;
-    object-fit: contain;
-    justify-content: center;
-    align-items: center;
-  `,
-
-  buttonGroup: css`
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-    gap: 0.5rem;
-  `,
-
-  buttonPadding: css`
-    padding: 1.2rem;
-  `,
-
-  takePhotoButton: css`
-    color: var(--text-primary) !important;
-  `,
-
-  uploadIcon: css`
-    margin-bottom: 1rem;
-    color: var(--text-secondary);
-  `,
-
-  iconStyle: css`
-    font-size: 3rem;
-    color: var(--text-inactive);
-  `,
-
-  uploadHeading: css`
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  `,
-
-  uploadInstructions: css`
-    color: var(--text-inactive);
-    text-align: center;
-    margin-bottom: 1rem;
-  `,
-
-  buttonContainer: css`
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    @media (min-width: 640px) {
-      flex-direction: row;
-    }
-  `,
-
-  buttonIcon: css`
-    margin-right: 0.5rem;
-  `,
-
-  hiddenInput: css`
-    display: none;
-  `
-};

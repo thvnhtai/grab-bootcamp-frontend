@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { NotificationType } from '../types/common';
+import { NotificationType } from '../types/utility';
 
 type NotificationContextType = {
   notify: (

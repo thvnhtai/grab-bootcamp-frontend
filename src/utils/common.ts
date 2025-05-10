@@ -17,35 +17,35 @@ export function objectToQueryString(
   return list.length ? `${prefix ? '?' : ''}${list.join('&')}` : '';
 }
 
-export const getCssVariableValue = (variable: string): string => {
+export function getCssVariableValue(variable: string): string {
   return getComputedStyle(document.documentElement)
     .getPropertyValue(variable)
     .trim();
-};
+}
 
-export const formatPrice = (price: number): string => {
+export function formatPrice(price: number): string {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
     minimumFractionDigits: 0
   }).format(price);
-};
+}
 
-export const formatScorePercentage = (
+export function formatScorePercentage(
   score: number | null | undefined
-): string => {
+): string {
   const value = (score ?? 0) * 100;
   return `${value.toFixed(1)}%`;
-};
+}
 
-export const fileToBase64 = (file: File): Promise<string> => {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = (error) => reject(error);
   });
-};
+}
 
 export function camelObject<T>(obj: T): T {
   if (Array.isArray(obj)) {
@@ -85,4 +85,12 @@ export function snakeObject<T>(obj: T): T {
     ) as T;
   }
   return obj;
+}
+
+export function createGoogleMapsSearchUrl(address: string): string {
+  if (!address) {
+    return '';
+  }
+  const searchQuery = address.replace(/ /g, '+');
+  return `https://www.google.com/maps/search/${searchQuery}`;
 }

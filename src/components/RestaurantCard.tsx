@@ -1,12 +1,18 @@
 /** @jsxImportSource @emotion/react */
-import { EnvironmentOutlined, StarFilled } from '@ant-design/icons';
 import { css } from '@emotion/react';
-import { Badge, Card, Carousel, Flex, Image, Tooltip, Typography } from 'antd';
-import { DEFAULT_IMAGE } from '../constants/common.constant.ts';
-import { PRICE_LEVEL } from '../constants/price.constants.ts';
+import { EnvironmentOutlined, StarFilled } from '@ant-design/icons';
+import { Badge, Card, Col, Flex, Image, Row, Tooltip, Typography } from 'antd';
+
+import { DEFAULT_IMAGE } from '../constants/common.constant';
+import { PRICE_LEVEL } from '../constants/price.constants';
+import { formatScorePercentage } from '../utils/common';
+
+import PriceLevelTag from './PriceLevelTag';
+
 import type { Restaurant } from '../types/restaurant';
-import { formatScorePercentage } from '../utils/common.ts';
-import PriceLevelTag from './PriceLevelTag.tsx';
+
+import { Styles } from '../types/utility';
+
 const { Text, Paragraph } = Typography;
 
 export type RestaurantCardProps = Pick<
@@ -18,7 +24,61 @@ export type RestaurantCardProps = Pick<
   | 'distance'
   | 'avatarUrl'
   | 'score'
->;
+> & {
+  onClick?: () => void;
+};
+
+const styles: Styles = {
+  card: css`
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    transition:
+      transform 0.2s ease-in-out,
+      box-shadow 0.2s ease-in-out;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  `,
+  contentWrapper: css`
+    cursor: pointer;
+    padding: 0;
+    gap: 0.5rem;
+  `,
+  ratingContainer: css`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  `,
+  ratingIcon: css`
+    font-size: 0.75rem;
+    color: var(--yellow-color-6);
+  `,
+  ratingText: css`
+    color: var(--yellow-color-6);
+    white-space: nowrap;
+    font-size: 0.75rem;
+  `,
+  addressText: css`
+    font-size: 0.75rem;
+    color: var(--text-secondary-1);
+  `,
+  distanceIcon: css`
+    font-size: 0.75rem;
+    color: var(--text-secondary-1);
+  `,
+  distanceText: css`
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  `
+};
 
 const RestaurantCard = ({
   restaurantName,
@@ -29,7 +89,7 @@ const RestaurantCard = ({
   avatarUrl,
   score,
   onClick
-}: RestaurantCardProps & { onClick?: () => void }) => {
+}: RestaurantCardProps) => {
   const priceConfig = PRICE_LEVEL[priceLevel] || {
     text: 'N/A',
     tooltip: 'Price information unavailable'
@@ -46,23 +106,20 @@ const RestaurantCard = ({
         css={styles.card}
         cover={
           <Image.PreviewGroup>
-            <Carousel
-              arrows
-              dotPosition='bottom'
-              draggable
-              css={styles.carousel}
-            >
-              <div>
-                <Image
-                  src={avatarUrl || DEFAULT_IMAGE}
-                  alt={restaurantName || 'Restaurant image'}
-                  width='100%'
-                  height={200}
-                  placeholder
-                  fallback={DEFAULT_IMAGE}
-                />
-              </div>
-            </Carousel>
+            <Image
+              src={avatarUrl || DEFAULT_IMAGE}
+              alt={restaurantName || 'Restaurant image'}
+              width='100%'
+              height={200}
+              style={{
+                objectFit: 'cover',
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px'
+              }}
+              placeholder
+              fallback={DEFAULT_IMAGE}
+              preview={false}
+            />
           </Image.PreviewGroup>
         }
         onClick={onClick}
@@ -90,19 +147,23 @@ const RestaurantCard = ({
             {address || 'No description available.'}
           </Paragraph>
 
-          <Flex justify='space-between' align='center'>
-            <Tooltip title={priceConfig.tooltip} placement='bottom'>
-              <Text strong>
-                <PriceLevelTag text={priceConfig.text} />
-              </Text>
-            </Tooltip>
-            <Flex align='center' gap={4}>
-              <EnvironmentOutlined css={styles.distanceText} />
-              <Text css={styles.distanceText}>
-                {distance != null ? `${distance} km` : 'N/A'}
-              </Text>
-            </Flex>
-          </Flex>
+          <Row align='middle' justify='space-between' gutter={[8, 8]}>
+            <Col>
+              <Tooltip title={priceConfig.tooltip} placement='bottom'>
+                <Text strong>
+                  <PriceLevelTag text={priceConfig.text} />
+                </Text>
+              </Tooltip>
+            </Col>
+            <Col>
+              <Flex align='center' gap={4}>
+                <EnvironmentOutlined css={styles.distanceText} />
+                <Text css={styles.distanceText}>
+                  {distance != null ? `${distance} km` : 'N/A'}
+                </Text>
+              </Flex>
+            </Col>
+          </Row>
         </Flex>
       </Card>
     </Badge.Ribbon>
@@ -110,52 +171,3 @@ const RestaurantCard = ({
 };
 
 export default RestaurantCard;
-
-const styles = {
-  card: css`
-    position: relative;
-    border-radius: 8px;
-    box-shadow: none;
-    cursor: pointer;
-    padding: 0;
-  `,
-  carousel: css`
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-    width: 100%;
-  `,
-  contentWrapper: css`
-    cursor: pointer;
-    padding: 0;
-    gap: 0.5rem;
-  `,
-  ratingContainer: css`
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 8px;
-
-    @media (max-width: 768px) {
-      gap: 4px;
-    }
-  `,
-  ratingIcon: css`
-    font-size: 14px;
-    color: var(--yellow-color-6);
-
-    @media (max-width: 480px) {
-      font-size: 12px;
-    }
-  `,
-  ratingText: css`
-    color: var(--yellow-color-6);
-    white-space: nowrap;
-
-    @media (max-width: 480px) {
-      font-size: 12px;
-    }
-  `,
-  distanceText: css`
-    color: var(--grey-color-4);
-  `
-};
