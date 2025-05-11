@@ -12,7 +12,9 @@ import { PageURLs, withPrefix } from '../utils/navigate';
 
 const HomePage = lazy(() => import('../pages/home/HomePage'));
 const SearchPage = lazy(() => import('../pages/search/SearchPage'));
-const SearchResultPage = lazy(() => import('../pages/search/SearchResultPage'));
+const SearchResultPage = lazy(
+  () => import('../pages/search-result/SearchResultPage')
+);
 
 export default function Routes() {
   return (

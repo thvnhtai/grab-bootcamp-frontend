@@ -20,7 +20,6 @@ const styles: Styles = {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   `,
   imageSkeleton: css`
     width: 100%;

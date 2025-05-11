@@ -101,6 +101,9 @@ const RestaurantCard = ({
         score != null ? `${formatScorePercentage(score)} match` : '0% match'
       }
       color='var(--primary-color)'
+      style={{
+        display: score != null ? 'block' : 'none'
+      }}
     >
       <Card
         css={styles.card}
@@ -116,9 +119,8 @@ const RestaurantCard = ({
                 borderTopLeftRadius: '8px',
                 borderTopRightRadius: '8px'
               }}
-              placeholder
-              fallback={DEFAULT_IMAGE}
               preview={false}
+              fallback={DEFAULT_IMAGE}
             />
           </Image.PreviewGroup>
         }

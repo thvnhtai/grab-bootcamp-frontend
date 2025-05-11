@@ -31,7 +31,7 @@ type Restaurant = {
   avatarUrl?: string;
   restaurantRating?: number;
   score: number;
-  distance: number;
+  distance: number | null;
   priceLevel: PriceLevel;
   address?: string;
   openingHours?: string;
@@ -42,6 +42,8 @@ type Restaurant = {
   mapUrl?: string;
   dishesPagination?: Pagination;
   reviewsPagination?: Pagination;
+  latitude?: number;
+  longitude?: number;
 };
 
 export { MenuItem, Review, Restaurant, SortByOption, PriceLevel, Filters };

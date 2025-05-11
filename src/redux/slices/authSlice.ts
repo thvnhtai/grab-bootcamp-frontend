@@ -5,6 +5,7 @@ import { LoginCredentials, SignupCredentials, User } from '../../types/auth';
 import { MessageType } from '../../types/utility';
 import { snakeObject } from '../../utils/common';
 import { createAppSlice } from '../createAppSlice';
+import { transformerObject } from '../transformer';
 
 interface AuthState {
   isLoading: boolean;
@@ -118,7 +119,7 @@ export const authSlice = createAppSlice({
     getUserProfile: create.asyncThunk(
       async (_, { rejectWithValue }) => {
         try {
-          const response = await apiService.get<User>('auth/profile');
+          const response = await apiService.get<User>('me');
           return response.data;
         } catch (error) {
           return rejectWithValue((error as { data: ErrorPayload }).data);
@@ -132,7 +133,7 @@ export const authSlice = createAppSlice({
         fulfilled: (state, action) => {
           state.isLoading = false;
           state.isAuthenticated = true;
-          state.user = action.payload;
+          state.user = transformerObject(action.payload);
         }
       }
     )

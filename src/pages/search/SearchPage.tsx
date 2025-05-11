@@ -1,20 +1,19 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
 import { Card, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../../components/Button';
 import ImageUpload from '../../components/ImageUpload';
-
-import { STEP_CONFIG } from '../../constants/common.constant';
-import { PageURLs } from '../../utils/navigate';
-import { useAnalyzeImage } from '../../hooks/useAnalyzeImage';
-
-import { Styles } from '../../types/utility';
-import { setMessages } from '../../redux/slices/appSlice';
-import { Message } from '../../enums/message.enum';
+import { useRestaurant } from '../../hooks/useRestaurant';
 import { useAppDispatch } from '../../redux/hooks';
+import { setMessages } from '../../redux/slices/appSlice';
+import { PageURLs } from '../../utils/navigate';
+import { Message } from '../../enums/message.enum';
+import { STEP_CONFIG } from '../../constants/common.constant';
+import { styles } from './SearchPage.styles';
+
+const MAX_RESTAURANTS = 50;
 
 const { Title, Paragraph } = Typography;
 
@@ -23,103 +22,12 @@ interface ImageData {
   preview: string;
 }
 
-const styles: Styles = {
-  pageContainer: css`
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-color);
-  `,
-  contentWrapper: css`
-    flex: 1;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    width: 100%;
-    max-width: 1200px;
-  `,
-  header: css`
-    text-align: center;
-    margin-bottom: 2.5rem;
-  `,
-  heading: css`
-    font-size: 1.875rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-  `,
-  subtitle: css`
-    font-size: 1rem;
-    color: var(--text-secondary-1);
-    max-width: 36rem;
-    margin: 0 auto;
-    line-height: 1.5;
-  `,
-  uploadSection: css`
-    margin-bottom: 3rem;
-  `,
-  analysisControls: css`
-    text-align: center;
-    margin-top: 2rem;
-  `,
-  analyzeButton: css`
-    padding: 1.2rem 2rem;
-    min-width: 200px;
-  `,
-  howItWorks: css`
-    margin-top: 4rem;
-  `,
-  sectionHeading: css`
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 2rem;
-    color: var(--text-primary);
-  `,
-  stepsContainer: css`
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(1, 1fr);
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  `,
-  stepCard: css`
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.2s ease;
-    border: none;
-    &:hover {
-      transform: translateY(-2px);
-    }
-  `,
-  stepIndicator: css`
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-  `,
-  stepTitle: css`
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-  `,
-  stepDescription: css`
-    color: var(--text-secondary-1);
-    font-size: 0.875rem;
-    line-height: 1.4;
-  `
-};
-
 const SearchPage = () => {
   const navigate = useNavigate();
-  const { analyzeImage, isLoading } = useAnalyzeImage();
-
-  const [imageData, setImageData] = useState<ImageData | null>(null);
-
   const dispatch = useAppDispatch();
+  const { analyzeImageAndFetch, isLoading, getUserCoordinates } =
+    useRestaurant();
+  const [imageData, setImageData] = useState<ImageData | null>(null);
 
   const handleImageUpload = useCallback(
     (file: File | null, preview: string | null) => {
@@ -143,8 +51,44 @@ const SearchPage = () => {
     }
 
     try {
-      const restaurants = await analyzeImage(imageData.file);
-      sessionStorage.setItem('searchResults', JSON.stringify(restaurants));
+      const userCoords = await getUserCoordinates();
+      if (!userCoords) {
+        dispatch(
+          setMessages([
+            {
+              type: Message.ERROR,
+              message: 'Location access denied',
+              description:
+                'Please allow location access to find nearby restaurants.'
+            }
+          ])
+        );
+        return;
+      }
+
+      const analyzedRestaurants = await analyzeImageAndFetch(
+        imageData.file,
+        MAX_RESTAURANTS,
+        userCoords
+      );
+      if (analyzedRestaurants.length === 0) {
+        dispatch(
+          setMessages([
+            {
+              type: Message.WARNING,
+              message: 'No restaurants found',
+              description:
+                'No restaurants were found matching the uploaded dish.'
+            }
+          ])
+        );
+        return;
+      }
+
+      sessionStorage.setItem(
+        'searchResults',
+        JSON.stringify(analyzedRestaurants)
+      );
       sessionStorage.setItem('uploadedImagePreview', imageData.preview);
       navigate(PageURLs.ofSearchResult());
     } catch (error) {
@@ -159,12 +103,11 @@ const SearchPage = () => {
         ])
       );
     }
-  }, [imageData, analyzeImage, navigate, dispatch]);
+  }, [imageData, analyzeImageAndFetch, getUserCoordinates, navigate, dispatch]);
 
   return (
     <div css={styles.pageContainer}>
       <main css={styles.contentWrapper}>
-        {/* Header Section */}
         <header css={styles.header}>
           <Title level={2} css={styles.heading}>
             Upload a Food Image
@@ -175,7 +118,6 @@ const SearchPage = () => {
           </Paragraph>
         </header>
 
-        {/* Upload Section */}
         <section css={styles.uploadSection}>
           <ImageUpload onImageUpload={handleImageUpload} />
           <div css={styles.analysisControls}>
@@ -190,7 +132,6 @@ const SearchPage = () => {
           </div>
         </section>
 
-        {/* How It Works Section */}
         <section css={styles.howItWorks}>
           <Title level={2} css={styles.sectionHeading}>
             How It Works

@@ -381,7 +381,7 @@ const RestaurantDetailModal = ({
           {/* Reviews Section */}
           <section css={styles.section}>
             <Title level={5} css={styles.sectionHeading}>
-              Customer Reviews ({data.restaurantRatingCount ?? 0})
+              Customer Reviews ({data.reviewsPagination?.total ?? 0})
             </Title>
             {customerReviews.length > 0 ? (
               <>
