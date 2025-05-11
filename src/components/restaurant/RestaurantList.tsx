@@ -5,8 +5,16 @@ import type { ColProps } from 'antd';
 
 import RestaurantCardSkeleton from './RestaurantCardSkeleton';
 
-import type { Restaurant } from '../types/restaurant';
-import { Styles } from '../types/utility';
+import type { Restaurant } from '../../types/restaurant';
+import { Styles } from '../../types/utility';
+
+const SKELETON_COUNT = 6;
+
+const styles: Styles = {
+  container: css`
+    width: 100%;
+  `
+};
 
 interface RestaurantListProps {
   data: Restaurant[];
@@ -19,24 +27,18 @@ interface RestaurantListProps {
   onItemClick?: (item: Restaurant) => void;
 }
 
-const SKELETON_COUNT = 6;
+export default function RestaurantList(props: RestaurantListProps) {
+  const {
+    data,
+    listLoading,
+    xs = 24,
+    sm = 12,
+    md = 8,
+    lg = 6,
+    xl = 6,
+    onItemClick
+  } = props;
 
-const styles: Styles = {
-  container: css`
-    width: 100%;
-  `
-};
-
-const RestaurantList = ({
-  data,
-  listLoading,
-  xs = 24,
-  sm = 12,
-  md = 8,
-  lg = 6,
-  xl = 6,
-  onItemClick
-}: RestaurantListProps) => {
   if (listLoading) {
     return (
       <Row css={styles.container} gutter={[32, 32]}>
@@ -80,6 +82,4 @@ const RestaurantList = ({
       ))}
     </Row>
   );
-};
-
-export default RestaurantList;
+}

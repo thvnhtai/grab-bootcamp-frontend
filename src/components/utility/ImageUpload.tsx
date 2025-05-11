@@ -10,13 +10,9 @@ import {
 import { Card, Typography } from 'antd';
 import { useCallback, useRef, useState } from 'react';
 
-import { fileToBase64 } from '../utils/common';
-import { Button } from './Button';
-import { Styles } from '../types/utility';
-
-interface ImageUploadProps {
-  onImageUpload: (file: File | null, previewUrl: string | null) => void;
-}
+import { fileToBase64 } from '../../utils/common';
+import { Styles } from '../../types/utility';
+import { Button } from '../common';
 
 const styles: Styles = {
   card: css`
@@ -119,10 +115,16 @@ const styles: Styles = {
   `
 };
 
-export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
+interface ImageUploadProps {
+  onImageUpload: (file: File | null, previewUrl: string | null) => void;
+}
+
+export default function ImageUpload(props: ImageUploadProps) {
+  const { onImageUpload } = props;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = useCallback(
     async (file: File) => {

@@ -1,25 +1,18 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import { Flex, Skeleton } from 'antd';
-
 import RestaurantCard, { RestaurantCardProps } from './RestaurantCard';
-
-import { Styles } from '../types/utility';
-
-interface RestaurantCardSkeletonProps extends Partial<RestaurantCardProps> {
-  loading?: boolean;
-  onClick?: () => void;
-}
+import { Styles } from '../../types/utility';
 
 const styles: Styles = {
   container: css`
-    display: flex;
-    flex-direction: column;
     gap: 1rem;
+    display: flex;
     padding: 1rem;
-    border: 1px solid var(--border-color);
     border-radius: 8px;
+    flex-direction: column;
     background-color: white;
+    border: 1px solid var(--border-color);
   `,
   imageSkeleton: css`
     width: 100%;
@@ -37,14 +30,18 @@ const styles: Styles = {
   `
 };
 
-const RestaurantCardSkeleton = ({
-  loading = true,
-  onClick,
-  ...props
-}: RestaurantCardSkeletonProps) => {
+interface RestaurantCardSkeletonProps extends Partial<RestaurantCardProps> {
+  loading?: boolean;
+  onClick?: () => void;
+}
+
+export default function RestaurantCardSkeleton(
+  props: RestaurantCardSkeletonProps
+) {
+  const { loading = true, onClick, ...rest } = props;
   if (!loading) {
     return (
-      <RestaurantCard {...(props as RestaurantCardProps)} onClick={onClick} />
+      <RestaurantCard {...(rest as RestaurantCardProps)} onClick={onClick} />
     );
   }
 
@@ -83,6 +80,4 @@ const RestaurantCardSkeleton = ({
       </Flex>
     </div>
   );
-};
-
-export default RestaurantCardSkeleton;
+}

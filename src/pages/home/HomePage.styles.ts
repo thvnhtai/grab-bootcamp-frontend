@@ -235,7 +235,7 @@ export const styles: Styles = {
   errorMessage: css`
     font-size: 1.125rem;
     color: var(--text-secondary-1);
-    margem-bottom: 1rem;
+    margin-bottom: 1rem;
   `,
   retryButton: css`
     padding: 0.75rem 1.5rem;

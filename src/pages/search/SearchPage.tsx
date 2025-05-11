@@ -1,17 +1,17 @@
 /** @jsxImportSource @emotion/react */
-import { Card, Typography } from 'antd';
 import { useCallback, useState } from 'react';
+
+import { Card, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-import { Button } from '../../components/Button';
-import ImageUpload from '../../components/ImageUpload';
-import { useRestaurant } from '../../hooks/useRestaurant';
-import { useAppDispatch } from '../../redux/hooks';
-import { setMessages } from '../../redux/slices/appSlice';
-import { PageURLs } from '../../utils/navigate';
-import { Message } from '../../enums/message.enum';
-import { STEP_CONFIG } from '../../constants/common.constant';
 import { styles } from './SearchPage.styles';
+import { PageURLs } from '../../utils/navigate';
+import { useAppDispatch } from '../../redux/hooks';
+import { Message } from '../../enums/message.enum';
+import { Button, ImageUpload } from '../../components';
+import { useRestaurant } from '../../hooks/useRestaurant';
+import { setMessages } from '../../redux/slices/appSlice';
+import { STEP_CONFIG } from '../../constants/common.constant';
 
 const MAX_RESTAURANTS = 50;
 

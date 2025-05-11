@@ -3,30 +3,17 @@ import { css } from '@emotion/react';
 import { EnvironmentOutlined, StarFilled } from '@ant-design/icons';
 import { Badge, Card, Col, Flex, Image, Row, Tooltip, Typography } from 'antd';
 
-import { DEFAULT_IMAGE } from '../constants/common.constant';
-import { PRICE_LEVEL } from '../constants/price.constants';
-import { formatScorePercentage } from '../utils/common';
+import { DEFAULT_IMAGE } from '../../constants/common.constant';
+import { PRICE_LEVEL } from '../../constants/price.constants';
+import { formatScorePercentage } from '../../utils/common';
 
 import PriceLevelTag from './PriceLevelTag';
 
-import type { Restaurant } from '../types/restaurant';
+import type { Restaurant } from '../../types/restaurant';
 
-import { Styles } from '../types/utility';
+import { Styles } from '../../types/utility';
 
 const { Text, Paragraph } = Typography;
-
-export type RestaurantCardProps = Pick<
-  Restaurant,
-  | 'restaurantName'
-  | 'restaurantRating'
-  | 'address'
-  | 'priceLevel'
-  | 'distance'
-  | 'avatarUrl'
-  | 'score'
-> & {
-  onClick?: () => void;
-};
 
 const styles: Styles = {
   card: css`
@@ -80,16 +67,32 @@ const styles: Styles = {
   `
 };
 
-const RestaurantCard = ({
-  restaurantName,
-  restaurantRating,
-  address,
-  priceLevel,
-  distance,
-  avatarUrl,
-  score,
-  onClick
-}: RestaurantCardProps) => {
+export interface RestaurantCardProps
+  extends Pick<
+    Restaurant,
+    | 'restaurantName'
+    | 'restaurantRating'
+    | 'address'
+    | 'priceLevel'
+    | 'distance'
+    | 'avatarUrl'
+    | 'score'
+  > {
+  onClick?: () => void;
+}
+
+export default function RestaurantCard(props: RestaurantCardProps) {
+  const {
+    restaurantName,
+    restaurantRating,
+    address,
+    priceLevel,
+    distance,
+    avatarUrl,
+    score,
+    onClick
+  } = props;
+
   const priceConfig = PRICE_LEVEL[priceLevel] || {
     text: 'N/A',
     tooltip: 'Price information unavailable'
@@ -170,6 +173,4 @@ const RestaurantCard = ({
       </Card>
     </Badge.Ribbon>
   );
-};
-
-export default RestaurantCard;
+}

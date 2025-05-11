@@ -21,26 +21,19 @@ import {
 } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_IMAGE } from '../constants/common.constant';
-import { PRICE_LEVEL } from '../constants/price.constants';
-import { formatScorePercentage } from '../utils/common';
-import { fetchPaginatedData } from '../services/restaurant.service';
+import { DEFAULT_IMAGE } from '../../constants/common.constant';
+import { PRICE_LEVEL } from '../../constants/price.constants';
+import { formatScorePercentage } from '../../utils/common';
+import { fetchPaginatedData } from '../../services/restaurant.service';
 
-import { Button } from './Button';
 import PriceLevelTag from './PriceLevelTag';
 
-import { MenuItem, Restaurant, Review } from '../types/restaurant';
+import { MenuItem, Restaurant, Review } from '../../types/restaurant';
 
-import { Styles } from '../types/utility';
+import { Styles } from '../../types/utility';
+import { Button } from '../common';
 
 const { Title, Text, Paragraph } = Typography;
-
-interface RestaurantDetailModalProps {
-  data: Restaurant | null;
-  isOpen: boolean;
-  onClose: () => void;
-  isLoading: boolean;
-}
 
 const styles: Styles = {
   content: css`
@@ -107,12 +100,17 @@ const styles: Styles = {
   `
 };
 
-const RestaurantDetailModal = ({
-  data,
-  isOpen,
-  onClose,
-  isLoading
-}: RestaurantDetailModalProps) => {
+interface RestaurantDetailModalProps {
+  data: Restaurant | null;
+  isOpen: boolean;
+  onClose: () => void;
+  isLoading: boolean;
+}
+
+export default function RestaurantDetailModal(
+  props: RestaurantDetailModalProps
+) {
+  const { data, isOpen, onClose, isLoading } = props;
   const [menuPage, setMenuPage] = useState(1);
   const [reviewsPage, setReviewsPage] = useState(1);
   const [menuLoading, setMenuLoading] = useState(false);
@@ -450,6 +448,4 @@ const RestaurantDetailModal = ({
       </div>
     </Modal>
   );
-};
-
-export default RestaurantDetailModal;
+}

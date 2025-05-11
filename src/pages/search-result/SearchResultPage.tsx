@@ -1,17 +1,18 @@
 /** @jsxImportSource @emotion/react */
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Col, Empty, Flex, Row, Spin } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
-import Filters from '../../components/Filters';
-import RestaurantDetailModal from '../../components/RestaurantDetailModal';
-import RestaurantList from '../../components/RestaurantList';
-import { transformerObject } from '../../redux/transformer';
-import { useRestaurant } from '../../hooks/useRestaurant';
+import { Link } from 'react-router-dom';
+import { Col, Empty, Flex, Row, Spin } from 'antd';
+
+import { ArrowLeftOutlined } from '@ant-design/icons';
+
 import { PageURLs } from '../../utils/navigate';
-import { Filters as FiltersType, Restaurant } from '../../types/restaurant';
 import { styles } from './SearchResultPage.styles';
+import Filters from '../../components/restaurant/Filters';
+import { useRestaurant } from '../../hooks/useRestaurant';
+import { transformerObject } from '../../redux/transformer';
+import { RestaurantDetailModal, RestaurantList } from '../../components';
+import { Filters as FiltersType, Restaurant } from '../../types/restaurant';
 
 const DEFAULT_FILTERS: FiltersType = {
   sortBy: 'score',
@@ -20,34 +21,20 @@ const DEFAULT_FILTERS: FiltersType = {
 };
 
 const SearchResultPage = () => {
-  const { fetchDetails, logRestaurantClick, isDetailLoading } = useRestaurant();
-  const [state, setState] = useState<{
-    allRestaurants: Restaurant[];
-    filteredRestaurants: Restaurant[];
-    uploadedImage: string | null;
-    selectedRestaurant: Restaurant | null;
-    isModalOpen: boolean;
-    isLoadingInitialData: boolean;
-    currentFilters: FiltersType;
-  }>({
-    allRestaurants: [],
-    filteredRestaurants: [],
-    uploadedImage: null,
-    selectedRestaurant: null,
-    isModalOpen: false,
-    isLoadingInitialData: true,
-    currentFilters: DEFAULT_FILTERS
-  });
+  const [allRestaurants, setAllRestaurants] = useState<Restaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
+    []
+  );
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<Restaurant | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoadingInitialData, setIsLoadingInitialData] =
+    useState<boolean>(true);
+  const [currentFilters, setCurrentFilters] =
+    useState<FiltersType>(DEFAULT_FILTERS);
 
-  const {
-    allRestaurants,
-    filteredRestaurants,
-    uploadedImage,
-    selectedRestaurant,
-    isModalOpen,
-    isLoadingInitialData,
-    currentFilters
-  } = state;
+  const { fetchDetails, logRestaurantClick, isDetailLoading } = useRestaurant();
 
   useEffect(() => {
     const storedResults = sessionStorage.getItem('searchResults');
@@ -57,11 +44,9 @@ const SearchResultPage = () => {
       try {
         const parsedRestaurants = JSON.parse(storedResults);
         const transformedRestaurants = transformerObject(parsedRestaurants);
-        setState((prev) => ({
-          ...prev,
-          allRestaurants: transformedRestaurants,
-          filteredRestaurants: transformedRestaurants
-        }));
+
+        setAllRestaurants(transformedRestaurants);
+        setFilteredRestaurants(transformedRestaurants);
       } catch (error) {
         console.error('Failed to parse search results:', error);
         sessionStorage.removeItem('searchResults');
@@ -69,10 +54,10 @@ const SearchResultPage = () => {
       }
     }
     if (storedImage) {
-      setState((prev) => ({ ...prev, uploadedImage: storedImage }));
+      setUploadedImage(storedImage);
     }
 
-    setState((prev) => ({ ...prev, isLoadingInitialData: false }));
+    setIsLoadingInitialData(false);
   }, []);
 
   useEffect(() => {
@@ -108,11 +93,11 @@ const SearchResultPage = () => {
       }
     });
 
-    setState((prev) => ({ ...prev, filteredRestaurants: result }));
+    setFilteredRestaurants(result);
   }, [allRestaurants, currentFilters]);
 
   const handleFilterChange = useCallback((filters: FiltersType) => {
-    setState((prev) => ({ ...prev, currentFilters: filters }));
+    setCurrentFilters(filters);
   }, []);
 
   const handleRestaurantClick = useCallback(
@@ -126,25 +111,21 @@ const SearchResultPage = () => {
 
       try {
         const detailedRestaurant = await fetchDetails(restaurant);
-        setState((prev) => ({
-          ...prev,
-          selectedRestaurant: detailedRestaurant,
-          isModalOpen: true
-        }));
+
+        setSelectedRestaurant(detailedRestaurant);
+        setIsModalOpen(true);
       } catch (error) {
         console.error('Failed to load restaurant details:', error);
-        setState((prev) => ({
-          ...prev,
-          selectedRestaurant: null,
-          isModalOpen: false
-        }));
+
+        setSelectedRestaurant(null);
+        setIsModalOpen(false);
       }
     },
     [fetchDetails, logRestaurantClick]
   );
 
   const handleModalClose = useCallback(() => {
-    setState((prev) => ({ ...prev, isModalOpen: false }));
+    setIsModalOpen(false);
   }, []);
 
   const showEmptyState = !isLoadingInitialData && allRestaurants.length === 0;

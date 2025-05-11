@@ -1,29 +1,24 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Divider, Form, Tabs, Typography } from 'antd';
-import { Rule } from 'antd/es/form';
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-
-import { Button } from '../../components/Button';
-import { GoogleIcon } from '../../components/static/GoogleIcon';
-import Logo from '../../components/static/Logo';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import dayjs from 'dayjs';
+import { Divider, Form, Tabs, Typography } from 'antd';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { Rule } from 'antd/es/form';
+import { css } from '@emotion/react';
+
+import { Styles } from '../../types/utility';
+import Logo from '../../components/static/Logo';
 import { setMessages } from '../../redux/slices/appSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { LoginCredentials, SignupCredentials } from '../../types/auth';
+import { Button, GoogleIcon, SignInForm, SignUpForm } from '../../components';
 import {
   login,
   selectAuthLoading,
   selectAuthMessage,
   signup
 } from '../../redux/slices/authSlice';
-
-import { Styles } from '../../types/utility';
-import { LoginCredentials, SignupCredentials } from '../../types/auth';
-
-const SignInForm = lazy(() => import('../../components/forms/SignInForm'));
-const SignUpForm = lazy(() => import('../../components/forms/SignUpForm'));
 
 const FORM_RULES: Record<string, Rule[]> = {
   name: [
@@ -106,27 +101,12 @@ const styles: Styles = {
 };
 
 const AuthPage = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('signin');
+  const dispatch = useAppDispatch();
   const [signinForm] = Form.useForm();
   const [signupForm] = Form.useForm();
-
-  const dispatch = useAppDispatch();
   const isLoading = useAppSelector(selectAuthLoading);
   const messageInfo = useAppSelector(selectAuthMessage);
-
-  useEffect(() => {
-    if (messageInfo) {
-      dispatch(
-        setMessages([
-          {
-            type: messageInfo?.type,
-            message: messageInfo?.message,
-            description: messageInfo?.description
-          }
-        ])
-      );
-    }
-  }, [dispatch, messageInfo]);
+  const [activeTab, setActiveTab] = useState<TabKey>('signin');
 
   const handleSignIn = useCallback(async () => {
     await signinForm.validateFields();
@@ -181,6 +161,19 @@ const AuthPage = () => {
     [handleSignIn, handleSignUp, isLoading, signinForm, signupForm]
   );
 
+  useEffect(() => {
+    if (messageInfo) {
+      dispatch(
+        setMessages([
+          {
+            type: messageInfo?.type,
+            message: messageInfo?.message,
+            description: messageInfo?.description
+          }
+        ])
+      );
+    }
+  }, [dispatch, messageInfo]);
   return (
     <div css={styles.pageContainer}>
       <main css={styles.contentWrapper}>

@@ -1,10 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
+
 import { Rule } from 'antd/es/form';
-import { Button } from '../Button';
-import { FormField } from '../FormField';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
+
 import { Styles } from '../../types/utility';
+import { Button, FormField } from '../common';
 
 interface SignInFormProps {
   form: FormInstance;
@@ -14,13 +15,8 @@ interface SignInFormProps {
   styles: Styles;
 }
 
-const SignInForm = ({
-  form,
-  onFinish,
-  isLoading,
-  rules,
-  styles
-}: SignInFormProps) => {
+export default function SignInForm(props: SignInFormProps) {
+  const { form, onFinish, isLoading, rules, styles } = props;
   return (
     <Form
       form={form}
@@ -54,6 +50,4 @@ const SignInForm = ({
       </Form.Item>
     </Form>
   );
-};
-
-export default SignInForm;
+}
