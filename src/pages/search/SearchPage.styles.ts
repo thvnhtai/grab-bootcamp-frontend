@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
-import { Styles } from '../../types/utility';
+
+import { Styles } from '../../types';
 
 export const styles: Styles = {
   pageContainer: css`
@@ -88,5 +89,10 @@ export const styles: Styles = {
     color: var(--text-secondary-1);
     font-size: 0.875rem;
     line-height: 1.4;
+  `,
+  loadingText: css`
+    margin-top: 16px;
+    text-align: center;
+    color: #888;
   `
 };

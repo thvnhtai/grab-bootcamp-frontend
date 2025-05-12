@@ -1,9 +1,11 @@
-import { notification } from 'antd';
 import { ReactNode, useCallback, useEffect } from 'react';
-import { NotificationContext } from '../hooks/useNotification';
+
+import { notification } from 'antd';
+
+import { NotificationType } from '../types';
 import { useAppSelector } from '../redux/hooks';
 import { watchMessages } from '../redux/slices/appSlice';
-import { NotificationType } from '../types/utility';
+import { NotificationContext } from '../hooks/useNotification';
 
 type NotificationProviderProps = {
   children: ReactNode;

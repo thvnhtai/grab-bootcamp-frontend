@@ -10,7 +10,7 @@ import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 
 import Logo from '../static/Logo';
 import { Button } from '../common';
-import { Styles } from '../../types/utility';
+import { Styles } from '../../types';
 import { PageURLs } from '../../utils/navigate';
 import { logout } from '../../redux/slices/authSlice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';

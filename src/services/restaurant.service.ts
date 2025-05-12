@@ -1,15 +1,16 @@
 import { transformerObject } from '../redux/transformer';
-import { ApiResponse, PaginatedResponse } from '../types/api';
-import { MenuItem, Restaurant, Review } from '../types/restaurant';
 import {
   calculateDistanceHaversine,
   createGoogleMapsSearchUrl
 } from '../utils/common';
-
-export type UserCoordinates = {
-  latitude: number;
-  longitude: number;
-};
+import {
+  ApiResponse,
+  MenuItem,
+  PaginatedResponse,
+  Restaurant,
+  Review,
+  UserCoordinates
+} from '../types';
 
 const DEFAULT_TOP_N = 20;
 const DEFAULT_PAGE_SIZE = 3;

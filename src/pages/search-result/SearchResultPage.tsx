@@ -11,8 +11,8 @@ import { styles } from './SearchResultPage.styles';
 import Filters from '../../components/restaurant/Filters';
 import { useRestaurant } from '../../hooks/useRestaurant';
 import { transformerObject } from '../../redux/transformer';
+import { Filters as FiltersType, Restaurant } from '../../types';
 import { RestaurantDetailModal, RestaurantList } from '../../components';
-import { Filters as FiltersType, Restaurant } from '../../types/restaurant';
 
 const DEFAULT_FILTERS: FiltersType = {
   sortBy: 'score',
@@ -152,14 +152,14 @@ const SearchResultPage = () => {
         )}
       </Flex>
 
-      <Row gutter={[32, 16]}>
-        <Col xs={24} md={6} css={styles.filters}>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={24} md={8} lg={6} xl={5} css={styles.filters}>
           {!isLoadingInitialData && (
             <Filters onFilterChange={handleFilterChange} />
           )}
         </Col>
 
-        <Col xs={24} md={18}>
+        <Col xs={24} sm={24} md={16} lg={18} xl={19}>
           {isLoadingInitialData && (
             <div css={styles.loading}>
               <Spin size='large' tip='Loading results...' />
@@ -182,9 +182,12 @@ const SearchResultPage = () => {
             <RestaurantList
               data={filteredRestaurants}
               listLoading={isLoadingInitialData}
-              md={12}
-              lg={8}
-              xl={6}
+              xs={24}
+              sm={12}
+              md={24}
+              lg={12}
+              xl={8}
+              xxl={6}
               onItemClick={handleRestaurantClick}
             />
           )}

@@ -2,15 +2,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { Spin } from 'antd';
 
-import {
-  ArrowRightOutlined,
-  CheckCircleFilled,
-  ReloadOutlined
-} from '@ant-design/icons';
+import { ArrowRightOutlined, CheckCircleFilled } from '@ant-design/icons';
 
-import { Restaurant } from '../../types/restaurant';
+import { Restaurant, UserCoordinates } from '../../types';
 import { useRestaurant } from '../../hooks/useRestaurant';
 import { getStepCardAnimation, styles } from './HomePage.styles';
 import {
@@ -61,28 +56,41 @@ const HomePage = () => {
     setIsModalOpen(false);
   }, []);
 
-  const fetchRecommendationsWithCoords = useCallback(async () => {
+  const fetchRecommendationsWithCoords = useCallback(
+    async (coords: UserCoordinates) => {
+      try {
+        await fetchRecommendations(MAX_RESTAURANTS, coords);
+        setHasFetchedRecommendations(true);
+      } catch (err) {
+        console.error('Failed to fetch recommendations:', err);
+        setHasFetchedRecommendations(false);
+      }
+    },
+    [fetchRecommendations]
+  );
+
+  const fetchRecommendationsWithoutCoords = useCallback(async () => {
     try {
-      const coords = await getUserCoordinates();
-      await fetchRecommendations(MAX_RESTAURANTS, coords);
+      await fetchRecommendations(MAX_RESTAURANTS);
       setHasFetchedRecommendations(true);
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
-      setHasFetchedRecommendations(true);
+      setHasFetchedRecommendations(false);
     }
-  }, [fetchRecommendations, getUserCoordinates]);
-
-  const handleRetryFetch = useCallback(() => {
-    setHasFetchedRecommendations(false);
-    fetchRecommendationsWithCoords();
-  }, [fetchRecommendationsWithCoords]);
+  }, [fetchRecommendations]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      async (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting && !hasFetchedRecommendations) {
-          fetchRecommendationsWithCoords();
+          const coords = await getUserCoordinates();
+
+          if (coords) {
+            fetchRecommendationsWithCoords(coords);
+          } else {
+            fetchRecommendationsWithoutCoords();
+          }
         }
       },
       { threshold: 0.1 }
@@ -91,6 +99,8 @@ const HomePage = () => {
     const currentRef = restaurantSectionRef.current;
     if (currentRef) {
       observer.observe(currentRef);
+    } else {
+      console.warn('restaurantSectionRef is null');
     }
 
     return () => {
@@ -99,7 +109,12 @@ const HomePage = () => {
       }
       observer.disconnect();
     };
-  }, [hasFetchedRecommendations, fetchRecommendationsWithCoords]);
+  }, [
+    hasFetchedRecommendations,
+    fetchRecommendationsWithCoords,
+    fetchRecommendationsWithoutCoords,
+    getUserCoordinates
+  ]);
 
   useEffect(() => {
     if (isModalOpen && selectedRestaurant?.restaurantId) {
@@ -215,35 +230,16 @@ const HomePage = () => {
       {/* Restaurant List Section */}
       <section css={styles.restaurantSection} ref={restaurantSectionRef}>
         <div css={[styles.container, styles.restaurantContainer]}>
-          {isLoading ? (
-            <Spin size='large' tip='Loading recommendations...' />
-          ) : recommendedRestaurants.length > 0 ? (
-            <RestaurantList
-              data={recommendedRestaurants}
-              listLoading={isLoading}
-              onItemClick={handleRestaurantClick}
-              xs={24}
-              md={12}
-              lg={8}
-              xl={6}
-            />
-          ) : (
-            hasFetchedRecommendations && (
-              <div css={styles.errorContainer}>
-                <p css={styles.errorMessage}>
-                  Failed to load recommendations. Please try again.
-                </p>
-                <Button
-                  variant='solid'
-                  icon={<ReloadOutlined />}
-                  css={styles.retryButton}
-                  onClick={handleRetryFetch}
-                >
-                  Retry
-                </Button>
-              </div>
-            )
-          )}
+          <RestaurantList
+            data={recommendedRestaurants}
+            listLoading={isLoading}
+            onItemClick={handleRestaurantClick}
+            xs={24}
+            md={12}
+            lg={8}
+            xl={6}
+            variant='compact'
+          />
         </div>
       </section>
 

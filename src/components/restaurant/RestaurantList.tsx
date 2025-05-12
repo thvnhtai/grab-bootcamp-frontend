@@ -1,18 +1,21 @@
 /** @jsxImportSource @emotion/react */
+import { Col, ColProps, Row } from 'antd';
+
 import { css } from '@emotion/react';
-import { Col, Row } from 'antd';
-import type { ColProps } from 'antd';
 
+import { Restaurant, Styles } from '../../types';
 import RestaurantCardSkeleton from './RestaurantCardSkeleton';
-
-import type { Restaurant } from '../../types/restaurant';
-import { Styles } from '../../types/utility';
 
 const SKELETON_COUNT = 6;
 
 const styles: Styles = {
   container: css`
     width: 100%;
+  `,
+  col: css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   `
 };
 
@@ -24,7 +27,9 @@ interface RestaurantListProps {
   md?: ColProps['md'];
   lg?: ColProps['lg'];
   xl?: ColProps['xl'];
+  xxl?: ColProps['xxl'];
   onItemClick?: (item: Restaurant) => void;
+  variant?: 'full' | 'compact';
 }
 
 export default function RestaurantList(props: RestaurantListProps) {
@@ -36,7 +41,9 @@ export default function RestaurantList(props: RestaurantListProps) {
     md = 8,
     lg = 6,
     xl = 6,
-    onItemClick
+    xxl = 4,
+    onItemClick,
+    variant = 'full'
   } = props;
 
   if (listLoading) {
@@ -50,8 +57,9 @@ export default function RestaurantList(props: RestaurantListProps) {
             md={md}
             lg={lg}
             xl={xl}
+            xxl={xxl}
           >
-            <RestaurantCardSkeleton loading={true} />
+            <RestaurantCardSkeleton loading={true} variant={variant} />
           </Col>
         ))}
       </Row>
@@ -72,11 +80,14 @@ export default function RestaurantList(props: RestaurantListProps) {
           md={md}
           lg={lg}
           xl={xl}
+          xxl={xxl}
+          css={styles.col}
         >
           <RestaurantCardSkeleton
             loading={false}
             {...item}
             onClick={() => onItemClick?.(item)}
+            variant={variant}
           />
         </Col>
       ))}

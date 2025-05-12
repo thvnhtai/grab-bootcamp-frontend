@@ -1,4 +1,8 @@
 /** @jsxImportSource @emotion/react */
+import { useCallback, useRef, useState } from 'react';
+
+import { Card, Typography } from 'antd';
+
 import { css } from '@emotion/react';
 import {
   CameraOutlined,
@@ -7,12 +11,10 @@ import {
   SyncOutlined,
   UploadOutlined
 } from '@ant-design/icons';
-import { Card, Typography } from 'antd';
-import { useCallback, useRef, useState } from 'react';
 
-import { fileToBase64 } from '../../utils/common';
-import { Styles } from '../../types/utility';
 import { Button } from '../common';
+import { Styles } from '../../types';
+import { fileToBase64 } from '../../utils/common';
 
 const styles: Styles = {
   card: css`

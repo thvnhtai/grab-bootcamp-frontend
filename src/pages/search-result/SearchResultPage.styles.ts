@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
-import { Styles } from '../../types/utility';
+
+import { Styles } from '../../types';
 
 export const styles: Styles = {
   container: css`

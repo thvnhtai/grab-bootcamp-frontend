@@ -1,17 +1,29 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { EnvironmentOutlined, StarFilled } from '@ant-design/icons';
-import { Badge, Card, Col, Flex, Image, Row, Tooltip, Typography } from 'antd';
+import {
+  Badge,
+  Card,
+  Col,
+  Divider,
+  Flex,
+  Image,
+  Row,
+  Tooltip,
+  Typography
+} from 'antd';
 
-import { DEFAULT_IMAGE } from '../../constants/common.constant';
-import { PRICE_LEVEL } from '../../constants/price.constants';
-import { formatScorePercentage } from '../../utils/common';
+import { css } from '@emotion/react';
+import {
+  EnvironmentOutlined,
+  ShopOutlined,
+  StarFilled
+} from '@ant-design/icons';
 
 import PriceLevelTag from './PriceLevelTag';
-
-import type { Restaurant } from '../../types/restaurant';
-
-import { Styles } from '../../types/utility';
+import { Restaurant, Styles } from '../../types';
+import { formatScorePercentage } from '../../utils/common';
+import { PRICE_LEVEL } from '../../constants/price.constants';
+import { DEFAULT_IMAGE } from '../../constants/common.constant';
+import { useMemo } from 'react';
 
 const { Text, Paragraph } = Typography;
 
@@ -31,11 +43,13 @@ const styles: Styles = {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
+    height: 100%;
   `,
   contentWrapper: css`
     cursor: pointer;
     padding: 0;
     gap: 0.5rem;
+    height: 100%;
   `,
   ratingContainer: css`
     display: flex;
@@ -52,6 +66,10 @@ const styles: Styles = {
     white-space: nowrap;
     font-size: 0.75rem;
   `,
+  restaurantNameIcon: css`
+    font-size: 0.75rem;
+    color: var(--text-secondary-1);
+  `,
   addressText: css`
     font-size: 0.75rem;
     color: var(--text-secondary-1);
@@ -62,6 +80,11 @@ const styles: Styles = {
   `,
   distanceText: css`
     font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  `,
+  foodPriceText: css`
+    font-size: 0.875rem;
     color: var(--text-secondary);
     white-space: nowrap;
   `
@@ -77,31 +100,56 @@ export interface RestaurantCardProps
     | 'distance'
     | 'avatarUrl'
     | 'score'
+    | 'foodName'
+    | 'foodPrice'
+    | 'imgUrl'
   > {
   onClick?: () => void;
+  variant?: 'full' | 'compact';
 }
 
-export default function RestaurantCard(props: RestaurantCardProps) {
-  const {
-    restaurantName,
-    restaurantRating,
-    address,
-    priceLevel,
-    distance,
-    avatarUrl,
-    score,
-    onClick
-  } = props;
+export default function RestaurantCard({
+  restaurantName,
+  restaurantRating,
+  address,
+  priceLevel,
+  distance,
+  score,
+  foodName,
+  foodPrice,
+  imgUrl,
+  avatarUrl,
+  onClick,
+  variant = 'full'
+}: RestaurantCardProps) {
+  const priceConfig = useMemo(
+    () =>
+      priceLevel
+        ? PRICE_LEVEL[priceLevel]
+        : {
+            text: 'N/A',
+            tooltip: 'N/A',
+            bgColor: 'var(--white-color)',
+            textColor: 'var(--text-primary)'
+          },
+    [priceLevel]
+  );
 
-  const priceConfig = PRICE_LEVEL[priceLevel] || {
-    text: 'N/A',
-    tooltip: 'Price information unavailable'
-  };
+  const imageSrc = imgUrl || avatarUrl || DEFAULT_IMAGE;
+
+  const isFullVariant = variant === 'full' || foodName || foodPrice || imgUrl;
 
   return (
     <Badge.Ribbon
       text={
-        score != null ? `${formatScorePercentage(score)} match` : '0% match'
+        <Flex vertical align='center'>
+          <Text style={{ fontSize: '10px', color: 'var(--text-white)' }}>
+            Match
+          </Text>
+          <Text style={{ fontSize: '14px', color: 'var(--text-white)' }}>
+            {score != null ? formatScorePercentage(score) : 'N/A'}
+          </Text>
+        </Flex>
       }
       color='var(--primary-color)'
       style={{
@@ -109,16 +157,21 @@ export default function RestaurantCard(props: RestaurantCardProps) {
       }}
     >
       <Card
-        css={styles.card}
+        css={[
+          styles.card,
+          css`
+            min-height: ${isFullVariant ? '400px' : '360px'};
+          `
+        ]}
         cover={
           <Image.PreviewGroup>
             <Image
-              src={avatarUrl || DEFAULT_IMAGE}
+              src={imageSrc}
               alt={restaurantName || 'Restaurant image'}
               width='100%'
               height={200}
               style={{
-                objectFit: 'cover',
+                objectFit: 'fill',
                 borderTopLeftRadius: '8px',
                 borderTopRightRadius: '8px'
               }}
@@ -128,15 +181,68 @@ export default function RestaurantCard(props: RestaurantCardProps) {
           </Image.PreviewGroup>
         }
         onClick={onClick}
+        styles={{
+          body: { padding: 16, paddingTop: `${isFullVariant ? 8 : 16}` }
+        }}
       >
         <Flex vertical css={styles.contentWrapper}>
-          <Flex justify='space-between' align='center' gap={4}>
-            <Paragraph
-              ellipsis={{ rows: 1, symbol: '...', tooltip: true }}
-              style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}
-            >
-              {restaurantName || 'Unnamed Restaurant'}
-            </Paragraph>
+          {isFullVariant && (
+            <>
+              <Flex
+                justify='space-between'
+                align='center'
+                gap={16}
+                style={{ minHeight: 40 }}
+              >
+                <Paragraph
+                  ellipsis={{ rows: 2, symbol: '...', tooltip: true }}
+                  style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}
+                >
+                  {foodName || 'Unnamed Food'}
+                </Paragraph>
+              </Flex>
+
+              <Flex align='middle' justify='start' gap={16}>
+                <Tooltip title={priceConfig['tooltip']} placement='bottom'>
+                  <Text strong>
+                    <PriceLevelTag
+                      text={priceConfig['text']}
+                      textColor={priceConfig['textColor']}
+                      bgColor={priceConfig['bgColor']}
+                    />
+                  </Text>
+                </Tooltip>
+                <Text css={styles.foodPriceText}>
+                  {foodPrice != null ? `${foodPrice}` : ''}
+                </Text>
+              </Flex>
+
+              <Divider style={{ marginTop: 8, marginBottom: 0 }} />
+            </>
+          )}
+
+          <Flex
+            justify='space-between'
+            align='center'
+            gap={16}
+            style={{ minHeight: 40 }}
+          >
+            <Flex align='center' gap={16}>
+              {isFullVariant && (
+                <ShopOutlined css={styles.restaurantNameIcon} />
+              )}
+              <Paragraph
+                ellipsis={{ rows: 2, symbol: '...', tooltip: true }}
+                style={{
+                  margin: 0,
+                  fontSize: isFullVariant ? '12px' : '14px',
+                  fontWeight: isFullVariant ? 500 : 600
+                }}
+              >
+                {restaurantName || 'Unnamed Restaurant'}
+              </Paragraph>
+            </Flex>
+
             <div css={styles.ratingContainer}>
               <StarFilled css={styles.ratingIcon} />
               <Text css={styles.ratingText}>
@@ -148,18 +254,33 @@ export default function RestaurantCard(props: RestaurantCardProps) {
           <Paragraph
             type='secondary'
             ellipsis={{ rows: 2, symbol: '...', tooltip: true }}
+            style={{
+              minHeight: 40,
+              fontSize: '12px',
+              marginBottom: 8
+            }}
           >
             {address || 'No description available.'}
           </Paragraph>
 
-          <Row align='middle' justify='space-between' gutter={[8, 8]}>
-            <Col>
-              <Tooltip title={priceConfig.tooltip} placement='bottom'>
-                <Text strong>
-                  <PriceLevelTag text={priceConfig.text} />
-                </Text>
-              </Tooltip>
-            </Col>
+          <Row
+            align='middle'
+            justify={isFullVariant ? 'end' : 'space-between'}
+            gutter={[8, 8]}
+          >
+            {!isFullVariant && (
+              <Col>
+                <Tooltip title={priceConfig['tooltip']} placement='bottom'>
+                  <Text strong>
+                    <PriceLevelTag
+                      text={priceConfig['text']}
+                      textColor={priceConfig['textColor']}
+                      bgColor={priceConfig['bgColor']}
+                    />
+                  </Text>
+                </Tooltip>
+              </Col>
+            )}
             <Col>
               <Flex align='center' gap={4}>
                 <EnvironmentOutlined css={styles.distanceText} />

@@ -1,17 +1,18 @@
 import { lazy } from 'react';
+
 import { Navigate, Route, Routes as RouteContainer } from 'react-router-dom';
+
 import { WithGuard } from '../guards';
 import { AuthGuard } from '../guards/AuthGuard';
-import { NonLoginGuard } from '../guards/NonLoginGuard';
 import { BaseLayout, MainLayout } from '../layouts';
-import IndexPage from '../pages';
-import AuthPage from '../pages/auth/AuthPage';
-import ForbiddenPage from '../pages/errors/ForbiddenPage';
-import NotFoundPage from '../pages/errors/NotFoundPage';
+import { NonLoginGuard } from '../guards/NonLoginGuard';
 import { PageURLs, withPrefix } from '../utils/navigate';
 
-const HomePage = lazy(() => import('../pages/home/HomePage'));
+const AuthPage = lazy(() => import('../pages/auth/AuthPage'));
 const SearchPage = lazy(() => import('../pages/search/SearchPage'));
+const HomePage = lazy(() => import('../pages/home/HomePage'));
+const ForbiddenPage = lazy(() => import('../pages/errors/ForbiddenPage'));
+const NotFoundPage = lazy(() => import('../pages/errors/NotFoundPage'));
 const SearchResultPage = lazy(
   () => import('../pages/search-result/SearchResultPage')
 );
@@ -22,7 +23,7 @@ export default function Routes() {
       <Route path={withPrefix('')} Component={BaseLayout}>
         <Route
           path={PageURLs.ofIndex()}
-          element={<WithGuard Page={IndexPage} Guard={AuthGuard} />}
+          element={<WithGuard Page={HomePage} Guard={AuthGuard} />}
         />
         <Route
           path={PageURLs.ofAuth()}

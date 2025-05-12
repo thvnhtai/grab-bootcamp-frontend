@@ -10,7 +10,7 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 
-import { Styles } from '../../types/utility';
+import { Styles } from '../../types';
 import { Button, FormField } from '../common';
 
 interface SignUpFormProps {

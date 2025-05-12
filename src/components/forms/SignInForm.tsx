@@ -4,7 +4,7 @@ import { Form, FormInstance } from 'antd';
 import { Rule } from 'antd/es/form';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 
-import { Styles } from '../../types/utility';
+import { Styles } from '../../types';
 import { Button, FormField } from '../common';
 
 interface SignInFormProps {

@@ -1,8 +1,6 @@
 import { transformerObject } from '../redux/transformer';
-import { ApiResponse } from '../types/api';
-import { Restaurant } from '../types/restaurant';
 import { calculateDistanceHaversine } from '../utils/common';
-import { UserCoordinates } from './restaurant.service';
+import { ApiResponse, Restaurant, UserCoordinates } from '../types';
 
 const DEFAULT_TOP_N = 20;
 

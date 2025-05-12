@@ -25,6 +25,11 @@ type Filters = {
   priceLevel?: PriceLevel[];
 };
 
+type UserCoordinates = {
+  latitude: number;
+  longitude: number;
+};
+
 type Restaurant = {
   restaurantId: string;
   restaurantName: string;
@@ -44,6 +49,18 @@ type Restaurant = {
   reviewsPagination?: Pagination;
   latitude?: number;
   longitude?: number;
+  imgId?: string;
+  foodName?: string;
+  foodPrice?: string;
+  imgUrl?: string;
 };
 
-export { MenuItem, Review, Restaurant, SortByOption, PriceLevel, Filters };
+export {
+  MenuItem,
+  Review,
+  Restaurant,
+  SortByOption,
+  PriceLevel,
+  Filters,
+  UserCoordinates
+};

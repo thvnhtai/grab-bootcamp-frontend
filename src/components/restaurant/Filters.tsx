@@ -1,12 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Collapse, Flex, Select, Slider, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PriceLevelKey } from '../../constants/price.constants';
-import { Filters as FiltersType, SortByOption } from '../../types/restaurant';
-import { Styles } from '../../types/utility';
+import { Collapse, Flex, Select, Slider, Typography } from 'antd';
+
+import { css } from '@emotion/react';
+
 import { Button } from '../common';
+import { PriceLevelKey } from '../../constants/price.constants';
+import { Filters as FiltersType, SortByOption, Styles } from '../../types';
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -18,9 +19,9 @@ const SORT_OPTIONS = [
 ];
 
 const PRICE_LEVEL_OPTIONS = [
-  { value: 1 as PriceLevelKey, label: '$ - Low' },
-  { value: 2 as PriceLevelKey, label: '$$ - Medium' },
-  { value: 3 as PriceLevelKey, label: '$$$ - High' }
+  { value: 1 as PriceLevelKey, label: '$ - Budget-friendly' },
+  { value: 2 as PriceLevelKey, label: '$$ - Moderate' },
+  { value: 3 as PriceLevelKey, label: '$$$ - Premium' }
 ];
 
 const RATING_CONFIG = {

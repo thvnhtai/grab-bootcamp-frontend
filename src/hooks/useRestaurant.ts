@@ -1,18 +1,15 @@
 import { useCallback, useState } from 'react';
 
 import { useAppSelector } from '../redux/hooks';
+import { Restaurant, UserCoordinates } from '../types';
 import { selectIsAuthenticated, selectUser } from '../redux/slices/authSlice';
 import {
+  addRestaurantClick,
   analyzeImage,
   fetchRestaurantDetails,
-  UserCoordinates
-} from '../services/restaurant.service';
-import {
-  addRestaurantClick,
   getRecommendedRestaurants,
   getRecommendedRestaurantsForGuest
-} from '../services/recommendation.service';
-import { Restaurant } from '../types/restaurant';
+} from '../services';
 
 const DEFAULT_TOP_N = 20;
 const ERROR_MESSAGES = {
@@ -20,15 +17,6 @@ const ERROR_MESSAGES = {
   FETCH_DETAILS: 'Failed to fetch restaurant details',
   FETCH_RECOMMENDATIONS: 'Failed to fetch recommended restaurants'
 } as const;
-
-interface RestaurantState {
-  restaurants: Restaurant[];
-  recommendedRestaurants: Restaurant[];
-  restaurantCache: Record<string, Restaurant>;
-  isLoading: boolean;
-  isDetailLoading: boolean;
-  error: string | null;
-}
 
 interface UseRestaurantResult {
   restaurants: Restaurant[];
@@ -54,42 +42,62 @@ interface UseRestaurantResult {
 }
 
 export const useRestaurant = (): UseRestaurantResult => {
-  const [state, setState] = useState<RestaurantState>({
-    restaurants: [],
-    recommendedRestaurants: [],
-    restaurantCache: {},
-    isLoading: false,
-    isDetailLoading: false,
-    error: null
-  });
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [recommendedRestaurants, setRecommendedRestaurants] = useState<
+    Restaurant[]
+  >([]);
+  const [restaurantCache, setRestaurantCache] = useState<
+    Record<string, Restaurant>
+  >({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
 
   const handleError = (message: string, error: unknown): void => {
     console.error(`${message}:`, error);
-    setState((prev) => ({ ...prev, error: message }));
+    setError(message);
   };
 
   const getUserCoordinates =
     useCallback(async (): Promise<UserCoordinates | null> => {
       if (!navigator.geolocation) {
         console.warn('Geolocation is not supported by this browser.');
+        handleError(
+          'Geolocation not supported',
+          new Error('Geolocation API is unavailable')
+        );
         return null;
       }
 
       try {
         const position = await new Promise<GeolocationPosition>(
           (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
+            navigator.geolocation.getCurrentPosition(
+              resolve,
+              (error) => reject(error),
+              { timeout: 10000, maximumAge: 60000, enableHighAccuracy: true }
+            );
           }
         );
         return {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
-      } catch (error) {
-        console.error('Failed to get user location:', error);
+      } catch (error: unknown) {
+        let errorMessage = 'Failed to get user location';
+        if (error instanceof GeolocationPositionError) {
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMessage = 'Location access denied by user';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorMessage = 'Location information is unavailable';
+          } else if (error.code === error.TIMEOUT) {
+            errorMessage = 'Location request timed out';
+          }
+        }
+        handleError(errorMessage, error);
         return null;
       }
     }, []);
@@ -100,17 +108,18 @@ export const useRestaurant = (): UseRestaurantResult => {
       topN: number = DEFAULT_TOP_N,
       userCoords?: UserCoordinates
     ): Promise<Restaurant[]> => {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      setIsLoading(true);
+      setError(null);
 
       try {
         const analyzedRestaurants = await analyzeImage(file, topN, userCoords);
-        setState((prev) => ({ ...prev, restaurants: analyzedRestaurants }));
+        setRestaurants(analyzedRestaurants);
         return analyzedRestaurants;
       } catch (error) {
         handleError(ERROR_MESSAGES.ANALYZE_IMAGE, error);
         throw error;
       } finally {
-        setState((prev) => ({ ...prev, isLoading: false }));
+        setIsLoading(false);
       }
     },
     []
@@ -129,7 +138,7 @@ export const useRestaurant = (): UseRestaurantResult => {
         return null;
       }
 
-      const cachedRestaurant = state.restaurantCache[restaurant.restaurantId];
+      const cachedRestaurant = restaurantCache[restaurant.restaurantId];
       if (cachedRestaurant) {
         if (
           userCoords &&
@@ -137,52 +146,47 @@ export const useRestaurant = (): UseRestaurantResult => {
           cachedRestaurant.longitude != null &&
           cachedRestaurant.distance == null
         ) {
-          setState((prev) => ({ ...prev, isDetailLoading: true }));
+          setIsDetailLoading(true);
           try {
             const updatedRestaurant = await fetchRestaurantDetails(
               restaurant,
               userCoords
             );
-            setState((prev) => ({
-              ...prev,
-              restaurantCache: {
-                ...prev.restaurantCache,
-                [restaurant.restaurantId]: updatedRestaurant
-              }
-            }));
+            setRestaurantCache({
+              ...restaurantCache,
+              [restaurant.restaurantId]: updatedRestaurant
+            });
             return updatedRestaurant;
           } catch (error) {
             handleError(ERROR_MESSAGES.FETCH_DETAILS, error);
             return null;
           } finally {
-            setState((prev) => ({ ...prev, isDetailLoading: false }));
+            setIsDetailLoading(false);
           }
         }
         return cachedRestaurant;
       }
 
-      setState((prev) => ({ ...prev, isDetailLoading: true, error: null }));
+      setIsDetailLoading(true);
+      setError(null);
       try {
         const detailedRestaurant = await fetchRestaurantDetails(
           restaurant,
           userCoords
         );
-        setState((prev) => ({
-          ...prev,
-          restaurantCache: {
-            ...prev.restaurantCache,
-            [restaurant.restaurantId]: detailedRestaurant
-          }
-        }));
+        setRestaurantCache({
+          ...restaurantCache,
+          [restaurant.restaurantId]: detailedRestaurant
+        });
         return detailedRestaurant;
       } catch (error) {
         handleError(ERROR_MESSAGES.FETCH_DETAILS, error);
         return null;
       } finally {
-        setState((prev) => ({ ...prev, isDetailLoading: false }));
+        setIsDetailLoading(false);
       }
     },
-    [state.restaurantCache]
+    [restaurantCache]
   );
 
   const logRestaurantClick = useCallback(
@@ -202,32 +206,31 @@ export const useRestaurant = (): UseRestaurantResult => {
       topN: number = DEFAULT_TOP_N,
       userCoords: UserCoordinates | null = null
     ): Promise<void> => {
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      setIsLoading(true);
+      setError(null);
 
       try {
         const recommendations =
           isAuthenticated && user?.userId
             ? await getRecommendedRestaurants(user.userId, topN, userCoords)
             : await getRecommendedRestaurantsForGuest(topN, userCoords);
-        setState((prev) => ({
-          ...prev,
-          recommendedRestaurants: recommendations
-        }));
+
+        setRecommendedRestaurants(recommendations);
       } catch (error) {
         handleError(ERROR_MESSAGES.FETCH_RECOMMENDATIONS, error);
       } finally {
-        setState((prev) => ({ ...prev, isLoading: false }));
+        setIsLoading(false);
       }
     },
     [isAuthenticated, user?.userId]
   );
 
   return {
-    restaurants: state.restaurants,
-    recommendedRestaurants: state.recommendedRestaurants,
-    isLoading: state.isLoading,
-    isDetailLoading: state.isDetailLoading,
-    error: state.error,
+    restaurants: restaurants,
+    recommendedRestaurants: recommendedRestaurants,
+    isLoading: isLoading,
+    isDetailLoading: isDetailLoading,
+    error: error,
     analyzeImageAndFetch,
     fetchDetails,
     logRestaurantClick,

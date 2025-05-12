@@ -1,10 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import {
-  ClockCircleOutlined,
-  EnvironmentOutlined,
-  StarFilled
-} from '@ant-design/icons';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   Badge,
   Col,
@@ -17,21 +13,24 @@ import {
   Row,
   Space,
   Spin,
+  Tooltip,
   Typography
 } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_IMAGE } from '../../constants/common.constant';
-import { PRICE_LEVEL } from '../../constants/price.constants';
-import { formatScorePercentage } from '../../utils/common';
-import { fetchPaginatedData } from '../../services/restaurant.service';
+import { css } from '@emotion/react';
+import {
+  ClockCircleOutlined,
+  EnvironmentOutlined,
+  StarFilled
+} from '@ant-design/icons';
 
-import PriceLevelTag from './PriceLevelTag';
-
-import { MenuItem, Restaurant, Review } from '../../types/restaurant';
-
-import { Styles } from '../../types/utility';
 import { Button } from '../common';
+import PriceLevelTag from './PriceLevelTag';
+import { fetchPaginatedData } from '../../services';
+import { formatScorePercentage } from '../../utils/common';
+import { PRICE_LEVEL } from '../../constants/price.constants';
+import { DEFAULT_IMAGE } from '../../constants/common.constant';
+import { MenuItem, Restaurant, Review, Styles } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -121,8 +120,13 @@ export default function RestaurantDetailModal(
   const priceConfig = useMemo(
     () =>
       data?.priceLevel
-        ? (PRICE_LEVEL[data.priceLevel] ?? { text: 'N/A', tooltip: '' })
-        : { text: 'N/A', tooltip: '' },
+        ? PRICE_LEVEL[data.priceLevel]
+        : {
+            text: 'N/A',
+            tooltip: 'No price level information available',
+            bgColor: 'var(--white-color)',
+            textColor: 'var(--text-primary)'
+          },
     [data?.priceLevel]
   );
 
@@ -280,7 +284,15 @@ export default function RestaurantDetailModal(
                 {data.restaurantRating?.toFixed(1) ?? 'N/A'}
               </Text>
               <Text type='secondary'>•</Text>
-              <PriceLevelTag text={priceConfig.text} />
+              <Tooltip title={priceConfig.tooltip} placement='bottom'>
+                <Text>
+                  <PriceLevelTag
+                    text={priceConfig.text}
+                    textColor={priceConfig.textColor}
+                    bgColor={priceConfig.bgColor}
+                  />
+                </Text>
+              </Tooltip>
             </Flex>
           </section>
 

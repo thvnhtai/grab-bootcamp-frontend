@@ -1,11 +1,15 @@
-import { MESSAGE } from '../../constants/message.constant';
-import { Message } from '../../enums/message.enum';
-import { ErrorPayload } from '../../types/api';
-import { LoginCredentials, SignupCredentials, User } from '../../types/auth';
-import { MessageType } from '../../types/utility';
 import { snakeObject } from '../../utils/common';
+import { Message } from '../../enums/message.enum';
 import { createAppSlice } from '../createAppSlice';
 import { transformerObject } from '../transformer';
+import { MESSAGE } from '../../constants/message.constant';
+import {
+  ErrorPayload,
+  LoginCredentials,
+  MessageType,
+  SignupCredentials,
+  User
+} from '../../types';
 
 interface AuthState {
   isLoading: boolean;

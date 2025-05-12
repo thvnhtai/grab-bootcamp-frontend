@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 
-import { Styles } from '../../types/utility';
+import { Styles } from '../../types';
 
 const styles: Styles = {
   container: css`

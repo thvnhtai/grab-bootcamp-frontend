@@ -57,9 +57,9 @@ const SearchPage = () => {
           setMessages([
             {
               type: Message.ERROR,
-              message: 'Location access denied',
+              message: 'Unable to get location',
               description:
-                'Please allow location access to find nearby restaurants.'
+                'Please ensure location access is enabled and try again.'
             }
           ])
         );
@@ -71,6 +71,7 @@ const SearchPage = () => {
         MAX_RESTAURANTS,
         userCoords
       );
+
       if (analyzedRestaurants.length === 0) {
         dispatch(
           setMessages([
@@ -91,14 +92,18 @@ const SearchPage = () => {
       );
       sessionStorage.setItem('uploadedImagePreview', imageData.preview);
       navigate(PageURLs.ofSearchResult());
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Image analysis failed:', error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while analyzing the image. Please try again.';
       dispatch(
         setMessages([
           {
             type: Message.ERROR,
             message: 'Image analysis failed',
-            description: 'An error occurred while analyzing the image.'
+            description: errorMessage
           }
         ])
       );
@@ -127,8 +132,13 @@ const SearchPage = () => {
               disabled={!imageData || isLoading}
               css={styles.analyzeButton}
             >
-              {isLoading ? 'Analyzing...' : 'Analyze Dish'}
+              {isLoading ? 'Processing...' : 'Analyze Dish'}
             </Button>
+            {isLoading && (
+              <Paragraph css={styles.loadingText}>
+                Analyzing your image, please wait...
+              </Paragraph>
+            )}
           </div>
         </section>
 
