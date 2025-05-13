@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useCallback, useState } from 'react';
 
-import { Card, Typography } from 'antd';
+import { Card, Select, Spin, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 import { styles } from './SearchPage.styles';
@@ -12,8 +12,6 @@ import { Button, ImageUpload } from '../../components';
 import { useRestaurant } from '../../hooks/useRestaurant';
 import { setMessages } from '../../redux/slices/appSlice';
 import { STEP_CONFIG } from '../../constants/common.constant';
-
-const MAX_RESTAURANTS = 50;
 
 const { Title, Paragraph } = Typography;
 
@@ -28,6 +26,7 @@ const SearchPage = () => {
   const { analyzeImageAndFetch, isLoading, getUserCoordinates } =
     useRestaurant();
   const [imageData, setImageData] = useState<ImageData | null>(null);
+  const [numberOfRestaurants, setNumberOfRestaurants] = useState<number>(50);
 
   const handleImageUpload = useCallback(
     (file: File | null, preview: string | null) => {
@@ -68,8 +67,11 @@ const SearchPage = () => {
 
       const analyzedRestaurants = await analyzeImageAndFetch(
         imageData.file,
-        MAX_RESTAURANTS,
-        userCoords
+        numberOfRestaurants,
+        {
+          latitude: 10.768778567106164,
+          longitude: 106.74621772556752
+        }
       );
 
       if (analyzedRestaurants.length === 0) {
@@ -108,7 +110,14 @@ const SearchPage = () => {
         ])
       );
     }
-  }, [imageData, analyzeImageAndFetch, getUserCoordinates, navigate, dispatch]);
+  }, [
+    imageData,
+    analyzeImageAndFetch,
+    getUserCoordinates,
+    navigate,
+    dispatch,
+    numberOfRestaurants
+  ]);
 
   return (
     <div css={styles.pageContainer}>
@@ -126,18 +135,35 @@ const SearchPage = () => {
         <section css={styles.uploadSection}>
           <ImageUpload onImageUpload={handleImageUpload} />
           <div css={styles.analysisControls}>
+            <div css={styles.selectContainer}>
+              <label css={styles.selectLabel}>Restaurants to show:</label>
+              <Select
+                defaultValue={50}
+                onChange={(value) => setNumberOfRestaurants(value)}
+                css={styles.restaurantSelect}
+                options={[
+                  { value: 10, label: '10' },
+                  { value: 30, label: '30' },
+                  { value: 50, label: '50' },
+                  { value: 100, label: '100' }
+                ]}
+              />
+            </div>
             <Button
               variant='solid'
               onClick={handleAnalyzeImage}
               disabled={!imageData || isLoading}
-              css={styles.analyzeButton}
+              css={[styles.analyzeButton]}
             >
-              {isLoading ? 'Processing...' : 'Analyze Dish'}
+              {isLoading ? <>Processing...</> : 'Analyze Dish'}
             </Button>
             {isLoading && (
-              <Paragraph css={styles.loadingText}>
-                Analyzing your image, please wait...
-              </Paragraph>
+              <>
+                <Paragraph css={styles.loadingText}>
+                  Analyzing your image, please wait...
+                </Paragraph>
+                <Spin css={styles.spinner} />
+              </>
             )}
           </div>
         </section>

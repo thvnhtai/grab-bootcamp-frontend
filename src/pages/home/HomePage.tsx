@@ -87,7 +87,10 @@ const HomePage = () => {
           const coords = await getUserCoordinates();
 
           if (coords) {
-            fetchRecommendationsWithCoords(coords);
+            fetchRecommendationsWithCoords({
+              latitude: 10.768778567106164,
+              longitude: 106.74621772556752
+            });
           } else {
             fetchRecommendationsWithoutCoords();
           }
@@ -235,9 +238,11 @@ const HomePage = () => {
             listLoading={isLoading}
             onItemClick={handleRestaurantClick}
             xs={24}
-            md={12}
+            sm={12}
+            md={8}
             lg={8}
             xl={6}
+            xxl={6}
             variant='compact'
           />
         </div>

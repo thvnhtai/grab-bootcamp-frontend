@@ -1,5 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
 import enUS from 'antd/es/locale/en_US';
@@ -10,35 +8,23 @@ import { AuthProvider } from './AuthProvider';
 import { ContextProvider } from './ContextProvider';
 import { NotificationProvider } from './NotificationProvider';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60,
-      gcTime: 1000 * 60 * 5
-    }
-  }
-});
-
 export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <ContextProvider>
-      <QueryClientProvider client={queryClient}>
-        <ConfigProvider
-          locale={enUS}
-          theme={{
-            token: {
-              fontFamily: 'Poppins, sans-serif'
-            }
-          }}
-        >
-          <Provider store={store}>
-            <NotificationProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </NotificationProvider>
-          </Provider>
-        </ConfigProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <ConfigProvider
+        locale={enUS}
+        theme={{
+          token: {
+            fontFamily: 'Poppins, sans-serif'
+          }
+        }}
+      >
+        <Provider store={store}>
+          <NotificationProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </NotificationProvider>
+        </Provider>
+      </ConfigProvider>
     </ContextProvider>
   );
 }

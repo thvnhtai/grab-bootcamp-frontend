@@ -130,7 +130,7 @@ export default function RestaurantCard({
             text: 'N/A',
             tooltip: 'N/A',
             bgColor: 'var(--white-color)',
-            textColor: 'var(--text-primary)'
+            textColor: 'var(--text-inactive)'
           },
     [priceLevel]
   );
@@ -200,18 +200,6 @@ export default function RestaurantCard({
                 >
                   {foodName || 'Unnamed Food'}
                 </Paragraph>
-              </Flex>
-
-              <Flex align='middle' justify='start' gap={16}>
-                <Tooltip title={priceConfig['tooltip']} placement='bottom'>
-                  <Text strong>
-                    <PriceLevelTag
-                      text={priceConfig['text']}
-                      textColor={priceConfig['textColor']}
-                      bgColor={priceConfig['bgColor']}
-                    />
-                  </Text>
-                </Tooltip>
                 <Text css={styles.foodPriceText}>
                   {foodPrice != null ? `${foodPrice}` : ''}
                 </Text>
@@ -263,32 +251,28 @@ export default function RestaurantCard({
             {address || 'No description available.'}
           </Paragraph>
 
-          <Row
-            align='middle'
-            justify={isFullVariant ? 'end' : 'space-between'}
-            gutter={[8, 8]}
-          >
-            {!isFullVariant && (
+          <Row align='middle' justify='space-between' gutter={[8, 8]}>
+            <Col>
+              <Tooltip title={priceConfig['tooltip']} placement='bottom'>
+                <Text>
+                  <PriceLevelTag
+                    text={priceConfig['text']}
+                    textColor={priceConfig['textColor']}
+                    bgColor={priceConfig['bgColor']}
+                  />
+                </Text>
+              </Tooltip>
+            </Col>
+            {distance !== null && (
               <Col>
-                <Tooltip title={priceConfig['tooltip']} placement='bottom'>
-                  <Text strong>
-                    <PriceLevelTag
-                      text={priceConfig['text']}
-                      textColor={priceConfig['textColor']}
-                      bgColor={priceConfig['bgColor']}
-                    />
+                <Flex align='center' gap={4}>
+                  <EnvironmentOutlined css={styles.distanceText} />
+                  <Text css={styles.distanceText}>
+                    {`${distance.toFixed(1)} km`}
                   </Text>
-                </Tooltip>
+                </Flex>
               </Col>
             )}
-            <Col>
-              <Flex align='center' gap={4}>
-                <EnvironmentOutlined css={styles.distanceText} />
-                <Text css={styles.distanceText}>
-                  {distance != null ? `${distance} km` : 'N/A'}
-                </Text>
-              </Flex>
-            </Col>
           </Row>
         </Flex>
       </Card>

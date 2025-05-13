@@ -10,7 +10,7 @@ export function NonLoginGuard({ children }: NonLoginGuardProps) {
   const { isLoggedIn } = useAuth();
 
   if (isLoggedIn) {
-    return <Navigate to={PageURLs.ofHome()} />;
+    return <Navigate to={PageURLs.ofHome()} replace />;
   }
 
   return <>{children}</>;

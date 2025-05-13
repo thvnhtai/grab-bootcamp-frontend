@@ -1,8 +1,5 @@
 import { transformerObject } from '../redux/transformer';
-import {
-  calculateDistanceHaversine,
-  createGoogleMapsSearchUrl
-} from '../utils/common';
+import { createGoogleMapsSearchUrl } from '../utils/common';
 import {
   ApiResponse,
   MenuItem,
@@ -12,29 +9,9 @@ import {
   UserCoordinates
 } from '../types';
 
-const DEFAULT_TOP_N = 20;
+const DEFAULT_TOP_N = 100;
 const DEFAULT_PAGE_SIZE = 3;
 const DEFAULT_REVIEW_SIZE = 2;
-
-const enhanceRestaurantWithDistance = (
-  restaurant: Restaurant,
-  userCoords?: UserCoordinates
-): Restaurant => {
-  if (
-    !userCoords ||
-    restaurant.latitude == null ||
-    restaurant.longitude == null
-  ) {
-    return restaurant;
-  }
-  const distance = calculateDistanceHaversine(
-    userCoords.latitude,
-    userCoords.longitude,
-    restaurant.latitude,
-    restaurant.longitude
-  );
-  return { ...restaurant, distance };
-};
 
 export const analyzeImage = async (
   file: File,
@@ -46,7 +23,7 @@ export const analyzeImage = async (
     formData.append('file', file);
 
     const response = await apiService.post<ApiResponse<Restaurant[]>>(
-      `image-search?top_n=${topN}`,
+      `image-search?top_n=${topN}&user_lat=${userCoords?.latitude}&user_long=${userCoords?.longitude}`,
       formData,
       {
         headers: {
@@ -56,12 +33,7 @@ export const analyzeImage = async (
       }
     );
 
-    const restaurants = transformerObject(response.data) as Restaurant[];
-    if (!userCoords) return restaurants;
-
-    return restaurants.map((restaurant) =>
-      enhanceRestaurantWithDistance(restaurant, userCoords)
-    );
+    return transformerObject(response.data) as Restaurant[];
   } catch (error) {
     console.error('Failed to analyze image:', error);
     return [];
@@ -76,7 +48,13 @@ export const fetchRestaurantDetails = async (
     const [detailResponse, dishesResponse, reviewsResponse] = await Promise.all(
       [
         apiService.get<ApiResponse<Restaurant>>(
-          `restaurant/${restaurant.restaurantId}`
+          `restaurant/${restaurant.restaurantId}`,
+          {
+            params: {
+              user_lat: userCoords?.latitude,
+              user_long: userCoords?.longitude
+            }
+          }
         ),
         apiService.get<PaginatedResponse<MenuItem>>(
           `restaurant/${restaurant.restaurantId}/dishes?page=1&page_size=${DEFAULT_PAGE_SIZE}`
@@ -100,7 +78,7 @@ export const fetchRestaurantDetails = async (
     const address = transformedDetail.data.address as string | undefined;
     const mapUrl = address ? createGoogleMapsSearchUrl(address) : '';
 
-    let detailedRestaurantData: Restaurant = {
+    const detailedRestaurantData: Restaurant = {
       ...restaurant,
       ...transformedDetail.data,
       mapUrl,
@@ -117,21 +95,6 @@ export const fetchRestaurantDetails = async (
         total: transformedReviews.metadata.total
       }
     };
-
-    detailedRestaurantData = enhanceRestaurantWithDistance(
-      detailedRestaurantData,
-      userCoords
-    );
-
-    if (
-      restaurant.distance != null &&
-      detailedRestaurantData.distance == null
-    ) {
-      detailedRestaurantData = {
-        ...detailedRestaurantData,
-        distance: restaurant.distance
-      };
-    }
 
     return detailedRestaurantData;
   } catch (error) {

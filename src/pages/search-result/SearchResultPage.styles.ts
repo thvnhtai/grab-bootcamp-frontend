@@ -43,7 +43,7 @@ export const styles: Styles = {
     padding-right: 1rem;
     @media (min-width: 768px) {
       position: sticky;
-      top: 2rem;
+      top: 6rem;
       align-self: flex-start;
       max-height: calc(100vh - 4rem);
     }

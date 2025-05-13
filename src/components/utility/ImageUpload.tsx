@@ -5,7 +5,6 @@ import { Card, Typography } from 'antd';
 
 import { css } from '@emotion/react';
 import {
-  CameraOutlined,
   CloudUploadOutlined,
   DeleteOutlined,
   SyncOutlined,
@@ -27,6 +26,11 @@ const styles: Styles = {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--background-color);
     transition: all 0.3s ease;
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
+
     &:hover {
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
@@ -63,6 +67,10 @@ const styles: Styles = {
     max-height: 16rem;
     object-fit: contain;
     border-radius: 0.25rem;
+
+    @media (max-width: 480px) {
+      max-height: 12rem;
+    }
   `,
   buttonGroup: css`
     display: flex;
@@ -76,6 +84,10 @@ const styles: Styles = {
     padding: 1.2rem;
     flex-grow: 1;
     justify-content: center;
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
   `,
   takePhotoButton: css`
     color: var(--text-primary) !important;
@@ -93,6 +105,7 @@ const styles: Styles = {
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text-primary);
+    text-align: center;
   `,
   uploadInstructions: css`
     color: var(--text-inactive);
@@ -243,13 +256,6 @@ export default function ImageUpload(props: ImageUploadProps) {
                 css={[styles.buttonPadding]}
               >
                 <UploadOutlined css={styles.buttonIcon} /> Upload Image
-              </Button>
-              <Button
-                variant='outlined'
-                onClick={handleButtonClick}
-                css={[styles.buttonPadding, styles.takePhotoButton]}
-              >
-                <CameraOutlined css={styles.buttonIcon} /> Take Photo
               </Button>
             </div>
           </>

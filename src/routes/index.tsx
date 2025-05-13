@@ -8,6 +8,7 @@ import { BaseLayout, MainLayout } from '../layouts';
 import { NonLoginGuard } from '../guards/NonLoginGuard';
 import { PageURLs, withPrefix } from '../utils/navigate';
 
+const IndexPage = lazy(() => import('../pages'));
 const AuthPage = lazy(() => import('../pages/auth/AuthPage'));
 const SearchPage = lazy(() => import('../pages/search/SearchPage'));
 const HomePage = lazy(() => import('../pages/home/HomePage'));
@@ -23,7 +24,7 @@ export default function Routes() {
       <Route path={withPrefix('')} Component={BaseLayout}>
         <Route
           path={PageURLs.ofIndex()}
-          element={<WithGuard Page={HomePage} Guard={AuthGuard} />}
+          element={<WithGuard Page={IndexPage} Guard={AuthGuard} />}
         />
         <Route
           path={PageURLs.ofAuth()}

@@ -16,7 +16,7 @@ export const STEP_CONFIG = [
   }
 ];
 
-export const MAX_RESTAURANTS = 20;
+export const MAX_RESTAURANTS = 8;
 
 export const FEATURES = [
   'Discover authentic local food stalls within 10km',

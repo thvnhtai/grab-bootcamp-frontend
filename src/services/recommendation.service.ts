@@ -1,5 +1,4 @@
 import { transformerObject } from '../redux/transformer';
-import { calculateDistanceHaversine } from '../utils/common';
 import { ApiResponse, Restaurant, UserCoordinates } from '../types';
 
 const DEFAULT_TOP_N = 20;
@@ -28,38 +27,23 @@ export const addRestaurantClick = async (
   }
 };
 
-const enhanceRestaurantsWithDistance = (
-  restaurants: Restaurant[],
-  userCoords: UserCoordinates | null
-): Restaurant[] => {
-  if (!userCoords) return restaurants;
-
-  return restaurants.map((restaurant) => {
-    if (restaurant.latitude == null || restaurant.longitude == null) {
-      return restaurant;
-    }
-    const distance = calculateDistanceHaversine(
-      userCoords.latitude,
-      userCoords.longitude,
-      restaurant.latitude,
-      restaurant.longitude
-    );
-    return { ...restaurant, distance };
-  });
-};
-
 export const getRecommendedRestaurants = async (
   userId: string,
   topN: number = DEFAULT_TOP_N,
-  userCoords: UserCoordinates | null = null
+  userCoords: UserCoordinates | null
 ): Promise<Restaurant[]> => {
   try {
     const response = await apiService.get<ApiResponse<Restaurant[]>>(
       `recommendation/user/${userId}`,
-      { params: { top_n: topN } }
+      {
+        params: {
+          top_n: topN,
+          user_lat: userCoords?.latitude,
+          user_long: userCoords?.longitude
+        }
+      }
     );
-    const restaurants = transformerObject(response.data) as Restaurant[];
-    return enhanceRestaurantsWithDistance(restaurants, userCoords);
+    return transformerObject(response.data) as Restaurant[];
   } catch (error) {
     logError(`Failed to get recommendations for user ${userId}:`, error);
     return [];
@@ -68,17 +52,20 @@ export const getRecommendedRestaurants = async (
 
 export const getRecommendedRestaurantsForGuest = async (
   topN: number = DEFAULT_TOP_N,
-  userCoords: UserCoordinates | null = null
+  userCoords: UserCoordinates | null
 ): Promise<Restaurant[]> => {
   try {
     const response = await apiService.get<ApiResponse<Restaurant[]>>(
       'recommendation/guest',
       {
-        params: { top_n: topN }
+        params: {
+          top_n: topN,
+          user_lat: userCoords?.latitude,
+          user_long: userCoords?.longitude
+        }
       }
     );
-    const restaurants = transformerObject(response.data) as Restaurant[];
-    return enhanceRestaurantsWithDistance(restaurants, userCoords);
+    return transformerObject(response.data) as Restaurant[];
   } catch (error) {
     logError('Failed to get recommendations for guest:', error);
     return [];
