@@ -18,6 +18,7 @@ import {
   selectAuthMessage,
   signup
 } from '../../redux/slices/authSlice';
+import { Message } from '../../enums/message.enum';
 
 const FORM_RULES: Record<string, Rule[]> = {
   name: [
@@ -65,8 +66,16 @@ const AuthPage = () => {
   }, [dispatch, signupForm]);
 
   const handleGoogleLogin = useCallback(() => {
-    console.log('Google login initiated');
-  }, []);
+    dispatch(
+      setMessages([
+        {
+          type: Message.INFO,
+          message: 'Google login is not implemented yet',
+          description: 'Please sign in with your email and password'
+        }
+      ])
+    );
+  }, [dispatch]);
 
   const tabItems = useMemo(
     () => [
@@ -113,6 +122,7 @@ const AuthPage = () => {
       );
     }
   }, [dispatch, messageInfo]);
+
   return (
     <div css={styles.pageContainer}>
       <main css={styles.contentWrapper}>

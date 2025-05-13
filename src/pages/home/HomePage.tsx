@@ -87,10 +87,7 @@ const HomePage = () => {
           const coords = await getUserCoordinates();
 
           if (coords) {
-            fetchRecommendationsWithCoords({
-              latitude: 10.768778567106164,
-              longitude: 106.74621772556752
-            });
+            fetchRecommendationsWithCoords(coords);
           } else {
             fetchRecommendationsWithoutCoords();
           }
@@ -98,14 +95,12 @@ const HomePage = () => {
       },
       { threshold: 0.1 }
     );
-
     const currentRef = restaurantSectionRef.current;
     if (currentRef) {
       observer.observe(currentRef);
     } else {
       console.warn('restaurantSectionRef is null');
     }
-
     return () => {
       if (currentRef) {
         observer.unobserve(currentRef);

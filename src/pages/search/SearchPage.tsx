@@ -68,10 +68,7 @@ const SearchPage = () => {
       const analyzedRestaurants = await analyzeImageAndFetch(
         imageData.file,
         numberOfRestaurants,
-        {
-          latitude: 10.768778567106164,
-          longitude: 106.74621772556752
-        }
+        userCoords
       );
 
       if (analyzedRestaurants.length === 0) {
