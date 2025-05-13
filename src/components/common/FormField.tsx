@@ -1,6 +1,17 @@
-import { Form, Input } from 'antd';
-import { Rule } from 'antd/es/form';
 import { ReactNode } from 'react';
+
+import { Form, Input } from 'antd';
+
+import { Rule } from 'antd/es/form';
+
+const { Password } = Input;
+const { Item } = Form;
+
+const inputStyles = {
+  input: {
+    marginLeft: 8
+  }
+};
 
 interface FormFieldProps {
   name: string;
@@ -10,16 +21,8 @@ interface FormFieldProps {
   password?: boolean;
 }
 
-const { Password } = Input;
-const { Item } = Form;
-
-export const FormField = ({
-  name,
-  rules,
-  prefixIcon,
-  placeholder,
-  password = false
-}: FormFieldProps) => {
+export default function FormField(props: FormFieldProps) {
+  const { name, rules, prefixIcon, placeholder, password = false } = props;
   return (
     <Item name={name} rules={rules}>
       {password ? (
@@ -39,10 +42,4 @@ export const FormField = ({
       )}
     </Item>
   );
-};
-
-const inputStyles = {
-  input: {
-    marginLeft: 8
-  }
-};
+}

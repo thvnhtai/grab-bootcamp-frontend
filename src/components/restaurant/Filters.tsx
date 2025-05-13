@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Collapse, Flex, Select, Slider, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Button } from './Button';
+import { Collapse, Flex, Select, Slider, Typography } from 'antd';
 
-import { PriceLevelKey } from '../constants/price.constants';
-import { Filters as FiltersType, SortByOption } from '../types/restaurant';
-import { Styles } from '../types/utility';
+import { css } from '@emotion/react';
+
+import { Button } from '../common';
+import { PriceLevelKey } from '../../constants/price.constants';
+import { Filters as FiltersType, SortByOption, Styles } from '../../types';
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -19,19 +19,15 @@ const SORT_OPTIONS = [
 ];
 
 const PRICE_LEVEL_OPTIONS = [
-  { value: 1 as PriceLevelKey, label: '$ - Low' },
-  { value: 2 as PriceLevelKey, label: '$$ - Medium' },
-  { value: 3 as PriceLevelKey, label: '$$$ - High' }
+  { value: 1 as PriceLevelKey, label: '$ - Budget-friendly' },
+  { value: 2 as PriceLevelKey, label: '$$ - Moderate' },
+  { value: 3 as PriceLevelKey, label: '$$$ - Premium' }
 ];
 
 const RATING_CONFIG = {
   MIN: 0,
   MAX: 5,
   STEP: 0.1
-};
-
-type FiltersProps = {
-  onFilterChange: (filters: FiltersType) => void;
 };
 
 const styles: Styles = {
@@ -60,7 +56,12 @@ const styles: Styles = {
   `
 };
 
-export default function Filters({ onFilterChange }: FiltersProps) {
+interface FiltersProps {
+  onFilterChange: (filters: FiltersType) => void;
+}
+
+export default function Filters(props: FiltersProps) {
+  const { onFilterChange } = props;
   const [sortBy, setSortBy] = useState<SortByOption>('score');
   const [minRating, setMinRating] = useState(RATING_CONFIG.MIN);
   const [priceLevel, setPriceLevel] = useState<PriceLevelKey[]>([]);
@@ -70,15 +71,15 @@ export default function Filters({ onFilterChange }: FiltersProps) {
     [sortBy, minRating, priceLevel]
   );
 
-  useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
-
   const handleReset = useCallback(() => {
     setSortBy('score');
     setMinRating(RATING_CONFIG.MIN);
     setPriceLevel([]);
   }, []);
+
+  useEffect(() => {
+    onFilterChange(filters);
+  }, [filters, onFilterChange]);
 
   return (
     <Collapse

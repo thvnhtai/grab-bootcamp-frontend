@@ -1,10 +1,15 @@
-import { MESSAGE } from '../../constants/message.constant';
-import { Message } from '../../enums/message.enum';
-import { ErrorPayload } from '../../types/api';
-import { LoginCredentials, SignupCredentials, User } from '../../types/auth';
-import { MessageType } from '../../types/utility';
 import { snakeObject } from '../../utils/common';
+import { Message } from '../../enums/message.enum';
 import { createAppSlice } from '../createAppSlice';
+import { transformerObject } from '../transformer';
+import { MESSAGE } from '../../constants/message.constant';
+import {
+  ErrorPayload,
+  LoginCredentials,
+  MessageType,
+  SignupCredentials,
+  User
+} from '../../types';
 
 interface AuthState {
   isLoading: boolean;
@@ -15,7 +20,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   isLoading: false,
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('access_token'),
   user: undefined,
   message: undefined
 };
@@ -118,7 +123,7 @@ export const authSlice = createAppSlice({
     getUserProfile: create.asyncThunk(
       async (_, { rejectWithValue }) => {
         try {
-          const response = await apiService.get<User>('auth/profile');
+          const response = await apiService.get<User>('me');
           return response.data;
         } catch (error) {
           return rejectWithValue((error as { data: ErrorPayload }).data);
@@ -132,7 +137,7 @@ export const authSlice = createAppSlice({
         fulfilled: (state, action) => {
           state.isLoading = false;
           state.isAuthenticated = true;
-          state.user = action.payload;
+          state.user = transformerObject(action.payload);
         }
       }
     )

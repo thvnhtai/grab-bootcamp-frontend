@@ -1,16 +1,17 @@
 /** @jsxImportSource @emotion/react */
+import dayjs from 'dayjs';
+import { DatePicker, Form, FormInstance, Select } from 'antd';
+
+import { Rule } from 'antd/es/form';
 import {
   CalendarOutlined,
   LockOutlined,
   MailOutlined,
   UserOutlined
 } from '@ant-design/icons';
-import { DatePicker, Form, FormInstance, Select } from 'antd';
-import { Rule } from 'antd/es/form';
-import dayjs from 'dayjs';
-import { Styles } from '../../types/utility';
-import { Button } from '../Button';
-import { FormField } from '../FormField';
+
+import { Styles } from '../../types';
+import { Button, FormField } from '../common';
 
 interface SignUpFormProps {
   form: FormInstance;
@@ -20,13 +21,8 @@ interface SignUpFormProps {
   styles: Styles;
 }
 
-const SignUpForm = ({
-  form,
-  onFinish,
-  isLoading,
-  rules,
-  styles
-}: SignUpFormProps) => {
+export default function SignUpForm(props: SignUpFormProps) {
+  const { form, onFinish, isLoading, rules, styles } = props;
   return (
     <Form
       form={form}
@@ -92,6 +88,4 @@ const SignUpForm = ({
       </Form.Item>
     </Form>
   );
-};
-
-export default SignUpForm;
+}

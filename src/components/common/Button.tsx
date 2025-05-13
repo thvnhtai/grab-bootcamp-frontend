@@ -1,30 +1,23 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Button as ButtonAnt, ButtonProps } from 'antd';
 import { darken, lighten } from 'polished';
-import { getCssVariableValue } from '../utils/common';
+import { Button as ButtonAnt, ButtonProps } from 'antd';
+
+import { css } from '@emotion/react';
+
+import { getCssVariableValue } from '../../utils/common';
 
 interface ExtendedButtonProps extends ButtonProps {
   variant?: 'solid' | 'outlined' | 'dashed' | 'filled' | 'text' | 'link';
 }
 
-export function Button(props: ExtendedButtonProps) {
-  const { variant, type, ...rest } = props;
-  return (
-    <ButtonAnt css={buttonStyle({ type: type!, variant })} {...rest}>
-      {props.children}
-    </ButtonAnt>
-  );
-}
-
 const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
-  const primaryColor = getCssVariableValue('--primary-color');
-  const borderColor = getCssVariableValue('--border-color');
+  const styleType = variant || type;
   const whiteColor = getCssVariableValue('--white-color');
+  const borderColor = getCssVariableValue('--border-color');
+  const bgSuccessColor = getCssVariableValue('--bg-success');
+  const primaryColor = getCssVariableValue('--primary-color');
   const inactiveColor = getCssVariableValue('--text-inactive');
   const secondaryColor = getCssVariableValue('--text-secondary-2');
-  const bgSuccessColor = getCssVariableValue('--bg-success');
-  const styleType = variant || type;
 
   switch (styleType) {
     case 'solid':
@@ -139,3 +132,13 @@ const buttonStyle = ({ type, variant }: { type: string; variant?: string }) => {
       `;
   }
 };
+
+export default function Button(props: ExtendedButtonProps) {
+  const { variant, type, ...rest } = props;
+
+  return (
+    <ButtonAnt css={buttonStyle({ type: type!, variant })} {...rest}>
+      {props.children}
+    </ButtonAnt>
+  );
+}

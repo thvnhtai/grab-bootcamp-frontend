@@ -1,10 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import {
-  ClockCircleOutlined,
-  EnvironmentOutlined,
-  StarFilled
-} from '@ant-design/icons';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   Badge,
   Col,
@@ -17,45 +13,49 @@ import {
   Row,
   Space,
   Spin,
+  Tooltip,
   Typography
 } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_IMAGE } from '../constants/common.constant';
-import { PRICE_LEVEL } from '../constants/price.constants';
-import { formatScorePercentage } from '../utils/common';
-import { fetchPaginatedData } from '../services/restaurant.service';
+import { css } from '@emotion/react';
+import {
+  ClockCircleOutlined,
+  EnvironmentOutlined,
+  StarFilled
+} from '@ant-design/icons';
 
-import { Button } from './Button';
+import { Button } from '../common';
 import PriceLevelTag from './PriceLevelTag';
-
-import { MenuItem, Restaurant, Review } from '../types/restaurant';
-
-import { Styles } from '../types/utility';
+import { fetchPaginatedData } from '../../services';
+import { formatScorePercentage } from '../../utils/common';
+import { PRICE_LEVEL } from '../../constants/price.constants';
+import { DEFAULT_IMAGE } from '../../constants/common.constant';
+import { MenuItem, Restaurant, Review, Styles } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
 
-interface RestaurantDetailModalProps {
-  data: Restaurant | null;
-  isOpen: boolean;
-  onClose: () => void;
-  isLoading: boolean;
-}
-
 const styles: Styles = {
   content: css`
-    padding: 1.5rem;
-    max-height: 85vh;
+    padding: 1rem;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
+
+    @media (min-width: 768px) {
+      padding: 1.5rem;
+    }
   `,
   imageContainer: css`
     border-radius: 0.5rem;
     overflow: hidden;
     margin-bottom: 1rem;
     background-color: var(--bg-disabled);
-    height: 20rem;
+    height: 16rem;
     width: 100%;
+
+    @media (min-width: 768px) {
+      height: 20rem;
+    }
   `,
   image: css`
     width: 100%;
@@ -64,55 +64,116 @@ const styles: Styles = {
   `,
   badgeRibbon: css`
     .ant-ribbon-wrapper {
-      top: 10px;
-      right: 10px;
+      top: 8px;
+      right: 8px;
     }
   `,
   sections: css`
     flex-grow: 1;
     overflow-y: auto;
-    padding-right: 1rem;
+    padding-right: 0.5rem;
+
+    @media (min-width: 768px) {
+      padding-right: 1rem;
+    }
+
+    /* Custom scrollbar for better mobile experience */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--text-secondary-1);
+      border-radius: 3px;
+    }
   `,
   section: css`
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+
+    @media (min-width: 768px) {
+      margin-bottom: 1.5rem;
+    }
   `,
   restaurantTitle: css`
     margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+
+    @media (min-width: 768px) {
+      font-size: 1.75rem;
+    }
   `,
   sectionHeading: css`
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+
+    @media (min-width: 768px) {
+      font-size: 1.25rem;
+    }
   `,
   icon: css`
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: var(--text-secondary-1);
-    margin-top: 0.35rem;
+    margin-top: 0.25rem;
+
+    @media (min-width: 768px) {
+      font-size: 1.25rem;
+      margin-top: 0.35rem;
+    }
   `,
   price: css`
     font-weight: 500;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
     flex-shrink: 0;
+
+    @media (min-width: 768px) {
+      margin-left: 1rem;
+    }
   `,
   button: css`
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
+    height: 2rem;
+    font-size: 0.875rem;
+
+    @media (min-width: 768px) {
+      min-width: 100px;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
   `,
   pagination: css`
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+
+    @media (min-width: 768px) {
+      margin-top: 1rem;
+    }
   `,
   reviewDate: css`
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+
+    @media (min-width: 768px) {
+      font-size: 0.875rem;
+    }
   `,
   reviewText: css`
-    font-size: 0.875rem;
+    font-size: 0.75rem;
+
+    @media (min-width: 768px) {
+      font-size: 0.875rem;
+    }
   `
 };
 
-const RestaurantDetailModal = ({
-  data,
-  isOpen,
-  onClose,
-  isLoading
-}: RestaurantDetailModalProps) => {
+interface RestaurantDetailModalProps {
+  data: Restaurant | null;
+  isOpen: boolean;
+  onClose: () => void;
+  isLoading: boolean;
+}
+
+export default function RestaurantDetailModal(
+  props: RestaurantDetailModalProps
+) {
+  const { data, isOpen, onClose, isLoading } = props;
   const [menuPage, setMenuPage] = useState(1);
   const [reviewsPage, setReviewsPage] = useState(1);
   const [menuLoading, setMenuLoading] = useState(false);
@@ -123,8 +184,13 @@ const RestaurantDetailModal = ({
   const priceConfig = useMemo(
     () =>
       data?.priceLevel
-        ? (PRICE_LEVEL[data.priceLevel] ?? { text: 'N/A', tooltip: '' })
-        : { text: 'N/A', tooltip: '' },
+        ? PRICE_LEVEL[data.priceLevel]
+        : {
+            text: 'N/A',
+            tooltip: 'No price level information available',
+            bgColor: 'var(--white-color)',
+            textColor: 'var(--text-primary)'
+          },
     [data?.priceLevel]
   );
 
@@ -203,8 +269,15 @@ const RestaurantDetailModal = ({
 
   if (isLoading || !data) {
     return (
-      <Modal open={isOpen} onCancel={onClose} footer={null} centered>
-        <Flex justify='center' align='center' style={{ minHeight: 300 }}>
+      <Modal
+        open={isOpen}
+        onCancel={onClose}
+        footer={null}
+        centered
+        width='90%'
+        style={{ maxWidth: 700 }}
+      >
+        <Flex justify='center' align='center' style={{ minHeight: 200 }}>
           <Spin
             size='large'
             tip={
@@ -221,24 +294,34 @@ const RestaurantDetailModal = ({
       open={isOpen}
       onCancel={onClose}
       footer={
-        <Flex gap={16}>
-          <Button onClick={onClose} variant='outlined' css={styles.button}>
-            Close
-          </Button>
-          <Button
-            onClick={handleOpenMap(data.mapUrl)}
-            disabled={!data.mapUrl}
-            variant='solid'
-            icon={<EnvironmentOutlined />}
-            css={styles.button}
-          >
-            View on Map
-          </Button>
-        </Flex>
+        <Row gutter={[8, 8]}>
+          <Col xs={24} sm={12}>
+            <Button
+              onClick={onClose}
+              variant='outlined'
+              block
+              css={styles.button}
+            >
+              Close
+            </Button>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Button
+              onClick={handleOpenMap(data.mapUrl)}
+              disabled={!data.mapUrl}
+              variant='solid'
+              icon={<EnvironmentOutlined />}
+              css={styles.button}
+              block
+            >
+              View on Map
+            </Button>
+          </Col>
+        </Row>
       }
       centered
-      width={700}
-      style={{ padding: 0 }}
+      width='90%'
+      style={{ maxWidth: 700, padding: 0 }}
     >
       <div css={styles.content}>
         {data.score != null ? (
@@ -271,34 +354,44 @@ const RestaurantDetailModal = ({
             <Title level={3} css={styles.restaurantTitle}>
               {data.restaurantName || 'Unnamed Restaurant'}
             </Title>
-            <Flex gap={8} align='center'>
+            <Flex gap={8} align='center' wrap='wrap'>
               <Rate
                 disabled
                 value={data.restaurantRating ?? 0}
                 allowHalf
-                character={<StarFilled style={{ fontSize: '16px' }} />}
+                character={<StarFilled style={{ fontSize: '14px' }} />}
               />
               <Text type='secondary'>
                 {data.restaurantRating?.toFixed(1) ?? 'N/A'}
               </Text>
               <Text type='secondary'>•</Text>
-              <PriceLevelTag text={priceConfig.text} />
+              <Tooltip title={priceConfig.tooltip} placement='bottom'>
+                <Text>
+                  <PriceLevelTag
+                    text={priceConfig.text}
+                    textColor={priceConfig.textColor}
+                    bgColor={priceConfig.bgColor}
+                  />
+                </Text>
+              </Tooltip>
             </Flex>
           </section>
 
           {/* Location and Hours Section */}
           <section css={styles.section}>
-            <Row gutter={[16, 16]}>
+            <Row gutter={[8, 8]}>
               <Col xs={24} sm={12}>
                 <Space align='start'>
                   <EnvironmentOutlined css={styles.icon} />
                   <div>
                     <Text strong>Location</Text>
-                    <Paragraph type='secondary' style={{ marginBottom: 0 }}>
+                    <Paragraph type='secondary'>
                       {data.address || 'No address provided'}
                     </Paragraph>
                     <Text type='secondary'>
-                      {data.distance != null ? `${data.distance} km away` : ''}
+                      {data.distance != null
+                        ? `${data.distance.toFixed(1)} km away`
+                        : ''}
                     </Text>
                   </div>
                 </Space>
@@ -308,7 +401,7 @@ const RestaurantDetailModal = ({
                   <ClockCircleOutlined css={styles.icon} />
                   <div>
                     <Text strong>Opening Hours</Text>
-                    <Paragraph type='secondary' style={{ marginBottom: 0 }}>
+                    <Paragraph type='secondary'>
                       {data.openingHours || 'Not available'}
                     </Paragraph>
                   </div>
@@ -381,7 +474,7 @@ const RestaurantDetailModal = ({
           {/* Reviews Section */}
           <section css={styles.section}>
             <Title level={5} css={styles.sectionHeading}>
-              Customer Reviews ({data.restaurantRatingCount ?? 0})
+              Customer Reviews ({data.reviewsPagination?.total ?? 0})
             </Title>
             {customerReviews.length > 0 ? (
               <>
@@ -408,7 +501,7 @@ const RestaurantDetailModal = ({
                               value={review.userRating ?? 0}
                               allowHalf
                               character={<StarFilled />}
-                              style={{ fontSize: '1rem' }}
+                              style={{ fontSize: '0.875rem' }}
                             />
                             <Paragraph
                               type='secondary'
@@ -450,6 +543,4 @@ const RestaurantDetailModal = ({
       </div>
     </Modal>
   );
-};
-
-export default RestaurantDetailModal;
+}

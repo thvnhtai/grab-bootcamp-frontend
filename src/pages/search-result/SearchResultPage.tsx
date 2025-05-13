@@ -1,81 +1,23 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Col, Empty, Flex, Row, Spin } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
+import { Col, Empty, Flex, Row, Spin } from 'antd';
 
-import Filters from '../../components/Filters';
-import RestaurantDetailModal from '../../components/RestaurantDetailModal';
-import RestaurantList from '../../components/RestaurantList';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 
-import { transformerObject } from '../../redux/transformer';
-import { fetchRestaurantDetails } from '../../services/restaurant.service';
 import { PageURLs } from '../../utils/navigate';
+import { styles } from './SearchResultPage.styles';
+import Filters from '../../components/restaurant/Filters';
+import { useRestaurant } from '../../hooks/useRestaurant';
+import { transformerObject } from '../../redux/transformer';
+import { Filters as FiltersType, Restaurant } from '../../types';
+import { RestaurantDetailModal, RestaurantList } from '../../components';
 
-import { Filters as FiltersType, Restaurant } from '../../types/restaurant';
-import { Styles } from '../../types/utility';
-
-const styles: Styles = {
-  container: css`
-    min-height: 100vh;
-    padding: 2rem 5%;
-    background-color: var(--bg-primary);
-  `,
-  header: css`
-    margin-bottom: 1.5rem;
-  `,
-  backLink: css`
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary-1);
-    font-weight: 500;
-    text-decoration: none;
-    &:hover {
-      color: var(--primary-color);
-    }
-  `,
-  imagePreview: css`
-    width: 5rem;
-    height: 5rem;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: var(--bg-disabled);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
-  `,
-  previewImage: css`
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  `,
-  filters: css`
-    max-height: calc(100vh - 4rem);
-    overflow-y: auto;
-    background-color: var(--bg-primary);
-    padding-right: 1rem;
-    @media (min-width: 768px) {
-      position: sticky;
-      top: 2rem;
-      align-self: flex-start;
-      max-height: calc(100vh - 4rem);
-    }
-  `,
-  loading: css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 300px;
-    width: 100%;
-  `,
-  empty: css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 300px;
-    width: 100%;
-  `
+const DEFAULT_FILTERS: FiltersType = {
+  sortBy: 'score',
+  minRating: 0,
+  priceLevel: []
 };
 
 const SearchResultPage = () => {
@@ -84,19 +26,15 @@ const SearchResultPage = () => {
     []
   );
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [restaurantCache, setRestaurantCache] = useState<
-    Record<string, Restaurant>
-  >({});
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
-  const [currentFilters, setCurrentFilters] = useState<FiltersType>({
-    sortBy: 'score',
-    minRating: 0,
-    priceLevel: []
-  });
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoadingInitialData, setIsLoadingInitialData] =
+    useState<boolean>(true);
+  const [currentFilters, setCurrentFilters] =
+    useState<FiltersType>(DEFAULT_FILTERS);
+
+  const { fetchDetails, logRestaurantClick, isDetailLoading } = useRestaurant();
 
   useEffect(() => {
     const storedResults = sessionStorage.getItem('searchResults');
@@ -106,7 +44,9 @@ const SearchResultPage = () => {
       try {
         const parsedRestaurants = JSON.parse(storedResults);
         const transformedRestaurants = transformerObject(parsedRestaurants);
+
         setAllRestaurants(transformedRestaurants);
+        setFilteredRestaurants(transformedRestaurants);
       } catch (error) {
         console.error('Failed to parse search results:', error);
         sessionStorage.removeItem('searchResults');
@@ -123,29 +63,30 @@ const SearchResultPage = () => {
   useEffect(() => {
     let result = [...allRestaurants];
 
-    // Apply rating filter
     if (currentFilters.minRating > 0) {
       result = result.filter(
         (r) => (r.restaurantRating ?? 0) >= currentFilters.minRating
       );
     }
 
-    // Apply price level filter
     if (currentFilters.priceLevel && currentFilters.priceLevel.length > 0) {
       result = result.filter(
         (r) =>
           r.priceLevel !== undefined &&
-          currentFilters.priceLevel?.includes(r.priceLevel)
+          currentFilters.priceLevel &&
+          currentFilters.priceLevel.includes(r.priceLevel)
       );
     }
 
-    // Apply sorting
     result.sort((a, b) => {
       switch (currentFilters.sortBy) {
         case 'rating':
           return (b.restaurantRating ?? 0) - (a.restaurantRating ?? 0);
         case 'distance':
-          return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+          if (a.distance == null && b.distance == null) return 0;
+          if (a.distance == null) return 1;
+          if (b.distance == null) return -1;
+          return a.distance - b.distance;
         case 'score':
         default:
           return (b.score ?? 0) - (a.score ?? 0);
@@ -166,32 +107,26 @@ const SearchResultPage = () => {
         return;
       }
 
-      const cached = restaurantCache[restaurant.restaurantId];
-      if (cached) {
-        setSelectedRestaurant(cached);
-        setIsModalOpen(true);
-        return;
-      }
+      logRestaurantClick(restaurant.restaurantId);
 
-      setIsDetailLoading(true);
-      setIsModalOpen(true);
       try {
-        const detailedRestaurant = await fetchRestaurantDetails(restaurant);
-        setRestaurantCache((prev) => ({
-          ...prev,
-          [restaurant.restaurantId]: detailedRestaurant
-        }));
+        const detailedRestaurant = await fetchDetails(restaurant);
+
         setSelectedRestaurant(detailedRestaurant);
+        setIsModalOpen(true);
       } catch (error) {
         console.error('Failed to load restaurant details:', error);
+
         setSelectedRestaurant(null);
         setIsModalOpen(false);
-      } finally {
-        setIsDetailLoading(false);
       }
     },
-    [restaurantCache]
+    [fetchDetails, logRestaurantClick]
   );
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
   const showEmptyState = !isLoadingInitialData && allRestaurants.length === 0;
   const showNoFilteredResults =
@@ -202,7 +137,6 @@ const SearchResultPage = () => {
 
   return (
     <Flex vertical css={styles.container}>
-      {/* Header */}
       <Flex align='center' justify='space-between' css={styles.header}>
         <Link to={PageURLs.ofSearch()} css={styles.backLink}>
           <ArrowLeftOutlined /> Back to Upload
@@ -218,16 +152,14 @@ const SearchResultPage = () => {
         )}
       </Flex>
 
-      <Row gutter={[32, 16]}>
-        {/* Filters Column */}
-        <Col xs={24} md={6} css={styles.filters}>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={24} md={8} lg={6} xl={5} css={styles.filters}>
           {!isLoadingInitialData && (
             <Filters onFilterChange={handleFilterChange} />
           )}
         </Col>
 
-        {/* Restaurant List Column */}
-        <Col xs={24} md={18}>
+        <Col xs={24} sm={24} md={16} lg={18} xl={19}>
           {isLoadingInitialData && (
             <div css={styles.loading}>
               <Spin size='large' tip='Loading results...' />
@@ -250,20 +182,22 @@ const SearchResultPage = () => {
             <RestaurantList
               data={filteredRestaurants}
               listLoading={isLoadingInitialData}
-              md={12}
-              lg={8}
-              xl={6}
+              xs={24}
+              sm={12}
+              md={24}
+              lg={12}
+              xl={8}
+              xxl={6}
               onItemClick={handleRestaurantClick}
             />
           )}
         </Col>
       </Row>
 
-      {/* Restaurant Detail Modal */}
       <RestaurantDetailModal
         data={selectedRestaurant}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
         isLoading={isDetailLoading}
       />
     </Flex>

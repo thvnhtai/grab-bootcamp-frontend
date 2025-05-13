@@ -94,3 +94,36 @@ export function createGoogleMapsSearchUrl(address: string): string {
   const searchQuery = address.replace(/ /g, '+');
   return `https://www.google.com/maps/search/${searchQuery}`;
 }
+
+function degreesToRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+export function calculateDistanceHaversine(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number | null {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+    return null;
+  }
+
+  const R = 6371;
+  const dLat = degreesToRadians(lat2 - lat1);
+  const dLon = degreesToRadians(lon2 - lon1);
+
+  const radLat1 = degreesToRadians(lat1);
+  const radLat2 = degreesToRadians(lat2);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(radLat1) *
+      Math.cos(radLat2) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return parseFloat(distance.toFixed(2));
+}

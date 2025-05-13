@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { Link } from 'react-router-dom';
-import { Styles } from '../../types/utility';
+
+import { Styles } from '../../types';
 
 export default function Logo() {
   return (

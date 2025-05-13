@@ -1,22 +1,19 @@
 /** @jsxImportSource @emotion/react */
+import { useCallback, useRef, useState } from 'react';
+
+import { Card, Typography } from 'antd';
+
 import { css } from '@emotion/react';
 import {
-  CameraOutlined,
   CloudUploadOutlined,
   DeleteOutlined,
   SyncOutlined,
   UploadOutlined
 } from '@ant-design/icons';
-import { Card, Typography } from 'antd';
-import { useCallback, useRef, useState } from 'react';
 
-import { fileToBase64 } from '../utils/common';
-import { Button } from './Button';
-import { Styles } from '../types/utility';
-
-interface ImageUploadProps {
-  onImageUpload: (file: File | null, previewUrl: string | null) => void;
-}
+import { Button } from '../common';
+import { Styles } from '../../types';
+import { fileToBase64 } from '../../utils/common';
 
 const styles: Styles = {
   card: css`
@@ -29,6 +26,11 @@ const styles: Styles = {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--background-color);
     transition: all 0.3s ease;
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
+
     &:hover {
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
@@ -65,6 +67,10 @@ const styles: Styles = {
     max-height: 16rem;
     object-fit: contain;
     border-radius: 0.25rem;
+
+    @media (max-width: 480px) {
+      max-height: 12rem;
+    }
   `,
   buttonGroup: css`
     display: flex;
@@ -78,6 +84,10 @@ const styles: Styles = {
     padding: 1.2rem;
     flex-grow: 1;
     justify-content: center;
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
   `,
   takePhotoButton: css`
     color: var(--text-primary) !important;
@@ -95,6 +105,7 @@ const styles: Styles = {
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text-primary);
+    text-align: center;
   `,
   uploadInstructions: css`
     color: var(--text-inactive);
@@ -119,10 +130,16 @@ const styles: Styles = {
   `
 };
 
-export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
+interface ImageUploadProps {
+  onImageUpload: (file: File | null, previewUrl: string | null) => void;
+}
+
+export default function ImageUpload(props: ImageUploadProps) {
+  const { onImageUpload } = props;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = useCallback(
     async (file: File) => {
@@ -239,13 +256,6 @@ export default function ImageUpload({ onImageUpload }: ImageUploadProps) {
                 css={[styles.buttonPadding]}
               >
                 <UploadOutlined css={styles.buttonIcon} /> Upload Image
-              </Button>
-              <Button
-                variant='outlined'
-                onClick={handleButtonClick}
-                css={[styles.buttonPadding, styles.takePhotoButton]}
-              >
-                <CameraOutlined css={styles.buttonIcon} /> Take Photo
               </Button>
             </div>
           </>

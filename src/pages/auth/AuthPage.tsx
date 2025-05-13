@@ -1,29 +1,24 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Divider, Form, Tabs, Typography } from 'antd';
-import { Rule } from 'antd/es/form';
-import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
-
-import { Button } from '../../components/Button';
-import { GoogleIcon } from '../../components/static/GoogleIcon';
-import Logo from '../../components/static/Logo';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import dayjs from 'dayjs';
+import { Divider, Form, Tabs, Typography } from 'antd';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { Rule } from 'antd/es/form';
+
+import { styles } from './AuthPage.styles';
+import Logo from '../../components/static/Logo';
 import { setMessages } from '../../redux/slices/appSlice';
+import { LoginCredentials, SignupCredentials } from '../../types';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { Button, GoogleIcon, SignInForm, SignUpForm } from '../../components';
 import {
   login,
   selectAuthLoading,
   selectAuthMessage,
   signup
 } from '../../redux/slices/authSlice';
-
-import { Styles } from '../../types/utility';
-import { LoginCredentials, SignupCredentials } from '../../types/auth';
-
-const SignInForm = lazy(() => import('../../components/forms/SignInForm'));
-const SignUpForm = lazy(() => import('../../components/forms/SignUpForm'));
+import { Message } from '../../enums/message.enum';
 
 const FORM_RULES: Record<string, Rule[]> = {
   name: [
@@ -45,88 +40,13 @@ const FORM_RULES: Record<string, Rule[]> = {
 
 type TabKey = 'signin' | 'signup';
 
-const styles: Styles = {
-  pageContainer: css`
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-secondary-1);
-  `,
-  contentWrapper: css`
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  `,
-  card: css`
-    width: 100%;
-    max-width: 28rem;
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    position: relative;
-    background-image: url('https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=2070');
-    background-size: cover;
-    background-position: center;
-  `,
-  cardOverlay: css`
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(4px);
-  `,
-  cardContent: css`
-    position: relative;
-    z-index: 1;
-  `,
-  headerWrapper: css`
-    text-align: center;
-    margin-bottom: 1.5rem;
-  `,
-  subtitle: css`
-    color: var(--text-secondary-1);
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-  `,
-  fullWidthInput: css`
-    width: 100%;
-  `,
-  fullWidthButton: css`
-    width: 100%;
-    padding: 1.2rem;
-    font-size: 1rem;
-    border-radius: 0.5rem;
-  `,
-  divider: css`
-    margin: 1.5rem 0;
-  `
-};
-
 const AuthPage = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('signin');
+  const dispatch = useAppDispatch();
   const [signinForm] = Form.useForm();
   const [signupForm] = Form.useForm();
-
-  const dispatch = useAppDispatch();
   const isLoading = useAppSelector(selectAuthLoading);
   const messageInfo = useAppSelector(selectAuthMessage);
-
-  useEffect(() => {
-    if (messageInfo) {
-      dispatch(
-        setMessages([
-          {
-            type: messageInfo?.type,
-            message: messageInfo?.message,
-            description: messageInfo?.description
-          }
-        ])
-      );
-    }
-  }, [dispatch, messageInfo]);
+  const [activeTab, setActiveTab] = useState<TabKey>('signin');
 
   const handleSignIn = useCallback(async () => {
     await signinForm.validateFields();
@@ -146,8 +66,16 @@ const AuthPage = () => {
   }, [dispatch, signupForm]);
 
   const handleGoogleLogin = useCallback(() => {
-    console.log('Google login initiated');
-  }, []);
+    dispatch(
+      setMessages([
+        {
+          type: Message.INFO,
+          message: 'Google login is not implemented yet',
+          description: 'Please sign in with your email and password'
+        }
+      ])
+    );
+  }, [dispatch]);
 
   const tabItems = useMemo(
     () => [
@@ -180,6 +108,20 @@ const AuthPage = () => {
     ],
     [handleSignIn, handleSignUp, isLoading, signinForm, signupForm]
   );
+
+  useEffect(() => {
+    if (messageInfo) {
+      dispatch(
+        setMessages([
+          {
+            type: messageInfo?.type,
+            message: messageInfo?.message,
+            description: messageInfo?.description
+          }
+        ])
+      );
+    }
+  }, [dispatch, messageInfo]);
 
   return (
     <div css={styles.pageContainer}>

@@ -1,12 +1,23 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Col, Row } from 'antd';
-import type { ColProps } from 'antd';
+import { Col, ColProps, Row } from 'antd';
 
+import { css } from '@emotion/react';
+
+import { Restaurant, Styles } from '../../types';
 import RestaurantCardSkeleton from './RestaurantCardSkeleton';
 
-import type { Restaurant } from '../types/restaurant';
-import { Styles } from '../types/utility';
+const SKELETON_COUNT = 6;
+
+const styles: Styles = {
+  container: css`
+    width: 100%;
+  `,
+  col: css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  `
+};
 
 interface RestaurantListProps {
   data: Restaurant[];
@@ -16,27 +27,25 @@ interface RestaurantListProps {
   md?: ColProps['md'];
   lg?: ColProps['lg'];
   xl?: ColProps['xl'];
+  xxl?: ColProps['xxl'];
   onItemClick?: (item: Restaurant) => void;
+  variant?: 'full' | 'compact';
 }
 
-const SKELETON_COUNT = 6;
+export default function RestaurantList(props: RestaurantListProps) {
+  const {
+    data,
+    listLoading,
+    xs = 24,
+    sm = 12,
+    md = 8,
+    lg = 6,
+    xl = 6,
+    xxl = 4,
+    onItemClick,
+    variant = 'full'
+  } = props;
 
-const styles: Styles = {
-  container: css`
-    width: 100%;
-  `
-};
-
-const RestaurantList = ({
-  data,
-  listLoading,
-  xs = 24,
-  sm = 12,
-  md = 8,
-  lg = 6,
-  xl = 6,
-  onItemClick
-}: RestaurantListProps) => {
   if (listLoading) {
     return (
       <Row css={styles.container} gutter={[32, 32]}>
@@ -48,8 +57,9 @@ const RestaurantList = ({
             md={md}
             lg={lg}
             xl={xl}
+            xxl={xxl}
           >
-            <RestaurantCardSkeleton loading={true} />
+            <RestaurantCardSkeleton loading={true} variant={variant} />
           </Col>
         ))}
       </Row>
@@ -70,16 +80,17 @@ const RestaurantList = ({
           md={md}
           lg={lg}
           xl={xl}
+          xxl={xxl}
+          css={styles.col}
         >
           <RestaurantCardSkeleton
             loading={false}
             {...item}
             onClick={() => onItemClick?.(item)}
+            variant={variant}
           />
         </Col>
       ))}
     </Row>
   );
-};
-
-export default RestaurantList;
+}

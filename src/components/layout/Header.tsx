@@ -1,26 +1,71 @@
 /** @jsxImportSource @emotion/react */
-import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+
+import { Col, Drawer, Dropdown, Menu, MenuProps, Row } from 'antd';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+
 import { css } from '@emotion/react';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
-import { Col, Drawer, Dropdown, Menu, MenuProps, Row } from 'antd';
-import { useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { logout } from '../redux/slices/authSlice';
-import { PageURLs } from '../utils/navigate';
-import { Button } from './Button';
-import Logo from './static/Logo';
-import { Styles } from '../types/utility';
+import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 
-const Header = () => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+import Logo from '../static/Logo';
+import { Button } from '../common';
+import { Styles } from '../../types';
+import { PageURLs } from '../../utils/navigate';
+import { logout } from '../../redux/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+
+const styles: Styles = {
+  underlineLink: css`
+    color: var(--border-color);
+    font-weight: 500;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover::after {
+      transform: scaleX(1);
+    }
+
+    &.active {
+      color: var(--primary-color);
+    }
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  `
+};
+
+export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   const handleLogout = async () => {
     await dispatch(logout()).unwrap();
+  };
+
+  const getSelectedKeys = () => {
+    const path = location.pathname;
+    if (path === PageURLs.ofHome()) return ['home'];
+    if (path === PageURLs.ofSearch()) return ['search'];
+    return [];
   };
 
   const menuItems: MenuProps['items'] = [
@@ -44,13 +89,6 @@ const Header = () => {
       danger: true
     }
   ];
-
-  const getSelectedKeys = () => {
-    const path = location.pathname;
-    if (path === PageURLs.ofHome()) return ['home'];
-    if (path === PageURLs.ofSearch()) return ['search'];
-    return [];
-  };
 
   return (
     <Row
@@ -175,41 +213,4 @@ const Header = () => {
       </Drawer>
     </Row>
   );
-};
-
-export default Header;
-
-const styles: Styles = {
-  underlineLink: css`
-    color: var(--border-color);
-    font-weight: 500;
-    text-decoration: none;
-    position: relative;
-    transition: color 0.3s ease;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 100%;
-      height: 2px;
-      background-color: currentColor;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.3s ease;
-    }
-
-    &:hover::after {
-      transform: scaleX(1);
-    }
-
-    &.active {
-      color: var(--primary-color);
-    }
-
-    &:hover {
-      color: var(--primary-color);
-    }
-  `
-};
+}

@@ -1,18 +1,22 @@
 import { lazy } from 'react';
+
 import { Navigate, Route, Routes as RouteContainer } from 'react-router-dom';
+
 import { WithGuard } from '../guards';
 import { AuthGuard } from '../guards/AuthGuard';
-import { NonLoginGuard } from '../guards/NonLoginGuard';
 import { BaseLayout, MainLayout } from '../layouts';
-import IndexPage from '../pages';
-import AuthPage from '../pages/auth/AuthPage';
-import ForbiddenPage from '../pages/errors/ForbiddenPage';
-import NotFoundPage from '../pages/errors/NotFoundPage';
+import { NonLoginGuard } from '../guards/NonLoginGuard';
 import { PageURLs, withPrefix } from '../utils/navigate';
 
-const HomePage = lazy(() => import('../pages/home/HomePage'));
+const IndexPage = lazy(() => import('../pages'));
+const AuthPage = lazy(() => import('../pages/auth/AuthPage'));
 const SearchPage = lazy(() => import('../pages/search/SearchPage'));
-const SearchResultPage = lazy(() => import('../pages/search/SearchResultPage'));
+const HomePage = lazy(() => import('../pages/home/HomePage'));
+const ForbiddenPage = lazy(() => import('../pages/errors/ForbiddenPage'));
+const NotFoundPage = lazy(() => import('../pages/errors/NotFoundPage'));
+const SearchResultPage = lazy(
+  () => import('../pages/search-result/SearchResultPage')
+);
 
 export default function Routes() {
   return (
