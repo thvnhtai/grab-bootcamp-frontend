@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Link } from 'react-router-dom';
 import { Col, Empty, Flex, Row, Spin } from 'antd';
@@ -7,6 +7,7 @@ import { Col, Empty, Flex, Row, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 
 import { PageURLs } from '../../utils/navigate';
+import useDebounce from '../../hooks/useDebounce';
 import { styles } from './SearchResultPage.styles';
 import Filters from '../../components/restaurant/Filters';
 import { useRestaurant } from '../../hooks/useRestaurant';
@@ -35,6 +36,7 @@ const SearchResultPage = () => {
     useState<FiltersType>(DEFAULT_FILTERS);
 
   const { fetchDetails, logRestaurantClick, isDetailLoading } = useRestaurant();
+  const debouncedFilters = useDebounce(currentFilters, 300);
 
   useEffect(() => {
     const storedResults = sessionStorage.getItem('searchResults');
@@ -44,9 +46,7 @@ const SearchResultPage = () => {
       try {
         const parsedRestaurants = JSON.parse(storedResults);
         const transformedRestaurants = transformerObject(parsedRestaurants);
-
         setAllRestaurants(transformedRestaurants);
-        setFilteredRestaurants(transformedRestaurants);
       } catch (error) {
         console.error('Failed to parse search results:', error);
         sessionStorage.removeItem('searchResults');
@@ -60,26 +60,25 @@ const SearchResultPage = () => {
     setIsLoadingInitialData(false);
   }, []);
 
-  useEffect(() => {
+  const computedRestaurants = useMemo(() => {
     let result = [...allRestaurants];
 
-    if (currentFilters.minRating > 0) {
+    if (debouncedFilters.minRating > 0) {
       result = result.filter(
-        (r) => (r.restaurantRating ?? 0) >= currentFilters.minRating
+        (r) => (r.restaurantRating ?? 0) >= debouncedFilters.minRating
       );
     }
 
-    if (currentFilters.priceLevel && currentFilters.priceLevel.length > 0) {
+    if (debouncedFilters.priceLevel && debouncedFilters.priceLevel.length > 0) {
       result = result.filter(
         (r) =>
           r.priceLevel !== undefined &&
-          currentFilters.priceLevel &&
-          currentFilters.priceLevel.includes(r.priceLevel)
+          debouncedFilters.priceLevel?.includes(r.priceLevel)
       );
     }
 
-    result.sort((a, b) => {
-      switch (currentFilters.sortBy) {
+    return result.sort((a, b) => {
+      switch (debouncedFilters.sortBy) {
         case 'rating':
           return (b.restaurantRating ?? 0) - (a.restaurantRating ?? 0);
         case 'distance':
@@ -92,9 +91,11 @@ const SearchResultPage = () => {
           return (b.score ?? 0) - (a.score ?? 0);
       }
     });
+  }, [allRestaurants, debouncedFilters]);
 
-    setFilteredRestaurants(result);
-  }, [allRestaurants, currentFilters]);
+  useEffect(() => {
+    setFilteredRestaurants(computedRestaurants);
+  }, [computedRestaurants]);
 
   const handleFilterChange = useCallback((filters: FiltersType) => {
     setCurrentFilters(filters);
@@ -111,12 +112,10 @@ const SearchResultPage = () => {
 
       try {
         const detailedRestaurant = await fetchDetails(restaurant);
-
         setSelectedRestaurant(detailedRestaurant);
         setIsModalOpen(true);
       } catch (error) {
         console.error('Failed to load restaurant details:', error);
-
         setSelectedRestaurant(null);
         setIsModalOpen(false);
       }

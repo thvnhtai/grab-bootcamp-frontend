@@ -11,9 +11,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      dispatch(getUserProfile());
-    }
+    dispatch(getUserProfile());
   }, [dispatch, isAuthenticated]);
 
   return (
