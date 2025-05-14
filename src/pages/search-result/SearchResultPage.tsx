@@ -101,31 +101,31 @@ const SearchResultPage = () => {
     setCurrentFilters(filters);
   }, []);
 
-  const handleRestaurantClick = useCallback(
-    async (restaurant: Restaurant) => {
-      if (!restaurant.restaurantId) {
-        console.warn('Attempted to click restaurant without ID:', restaurant);
-        return;
-      }
-
-      logRestaurantClick(restaurant.restaurantId);
-
-      try {
-        const detailedRestaurant = await fetchDetails(restaurant);
-        setSelectedRestaurant(detailedRestaurant);
-        setIsModalOpen(true);
-      } catch (error) {
-        console.error('Failed to load restaurant details:', error);
-        setSelectedRestaurant(null);
-        setIsModalOpen(false);
-      }
-    },
-    [fetchDetails, logRestaurantClick]
-  );
+  const handleRestaurantClick = useCallback((restaurant: Restaurant) => {
+    if (!restaurant.restaurantId) {
+      console.warn('Clicked restaurant has no ID:', restaurant);
+      return;
+    }
+    setSelectedRestaurant(restaurant);
+    setIsModalOpen(true);
+  }, []);
 
   const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (isModalOpen && selectedRestaurant?.restaurantId) {
+      fetchDetails(selectedRestaurant).then((details) => {
+        setSelectedRestaurant(details);
+        if (details?.restaurantId) {
+          logRestaurantClick(details.restaurantId);
+        }
+      });
+    } else if (!isModalOpen) {
+      setSelectedRestaurant(null);
+    }
+  }, [isModalOpen, selectedRestaurant, fetchDetails, logRestaurantClick]);
 
   const showEmptyState = !isLoadingInitialData && allRestaurants.length === 0;
   const showNoFilteredResults =
