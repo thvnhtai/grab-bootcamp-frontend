@@ -23,7 +23,11 @@ export const analyzeImage = async (
     formData.append('file', file);
 
     const response = await apiService.post<ApiResponse<Restaurant[]>>(
-      `image-search?top_n=${topN}&user_lat=${userCoords?.latitude}&user_long=${userCoords?.longitude}`,
+      `image-search?top_n=${topN}${
+        userCoords 
+          ? `&user_lat=${userCoords.latitude}&user_long=${userCoords.longitude}`
+          : ''
+      }`,
       formData,
       {
         headers: {
