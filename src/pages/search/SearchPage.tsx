@@ -51,24 +51,11 @@ const SearchPage = () => {
 
     try {
       const userCoords = await getUserCoordinates();
-      if (!userCoords) {
-        dispatch(
-          setMessages([
-            {
-              type: Message.ERROR,
-              message: 'Unable to get location',
-              description:
-                'Please ensure location access is enabled and try again.'
-            }
-          ])
-        );
-        return;
-      }
 
       const analyzedRestaurants = await analyzeImageAndFetch(
         imageData.file,
         numberOfRestaurants,
-        userCoords
+        userCoords || undefined
       );
 
       if (analyzedRestaurants.length === 0) {
