@@ -1,12 +1,24 @@
 export const MESSAGE = {
-  LOGIN_SUCCESS: 'Đăng nhập thành công!',
-  LOGIN_FAILED: 'Đăng nhập thất bại!',
-  LOGIN_INVALID: 'Tài khoản hoặc mật khẩu không đúng!',
-  LOGIN_EXPIRED: 'Phiên đăng nhập đã hết hạn!',
+  LOGIN_SUCCESS: 'Great to see you again!',
+  LOGIN_FAILED: 'Oops! Something went wrong',
+  LOGIN_INVALID: 'Hmm... that didn’t work',
+  LOGIN_EXPIRED: 'You’ve been signed out',
 
-  REGISTER_SUCCESS: 'Tạo tài khoản thành công!',
-  REGISTER_FAILED: 'Tạo tài khoản thất bại!',
+  SIGNUP_SUCCESS: 'Welcome aboard!',
+  SIGNUP_FAILED: 'Couldn’t create your account',
 
-  LOGOUT_SUCCESS: 'Đăng xuất thành công!',
-  LOGOUT_FAILED: 'Đăng xuất thất bại!'
+  LOGOUT_SUCCESS: 'See you soon!',
+  LOGOUT_FAILED: 'Trouble logging out',
+
+  PROFILE_SUCCESS: 'Got your info!',
+  PROFILE_FAILED: 'We couldn’t grab your profile',
+
+  IMAGE_ANALYSIS_SUCCESS: 'Found some great spots!',
+  IMAGE_ANALYSIS_FAILED: 'Couldn’t analyze the image',
+
+  RESTAURANT_DETAILS_SUCCESS: 'Here’s the full scoop!',
+  RESTAURANT_DETAILS_FAILED: 'Couldn’t fetch restaurant details',
+
+  PAGINATED_DATA_SUCCESS: 'More info loaded!',
+  PAGINATED_DATA_FAILED: 'Trouble loading more data'
 };

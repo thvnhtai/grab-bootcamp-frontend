@@ -1,16 +1,17 @@
 import { ReactNode, useEffect } from 'react';
 import { AuthContext } from '../hooks/useAuth';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { getUserProfile, watchLoggedIn } from '../redux/slices/authSlice';
+import {
+  getUserProfile,
+  selectIsAuthenticated
+} from '../redux/slices/authSlice';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector(watchLoggedIn);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      dispatch(getUserProfile());
-    }
+    dispatch(getUserProfile());
   }, [dispatch, isAuthenticated]);
 
   return (

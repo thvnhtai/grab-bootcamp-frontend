@@ -1,7 +1,9 @@
 import { Layout } from 'antd';
 import { Outlet } from 'react-router-dom';
-import Footer from '../components/Footer';
-import Header from '../components/Header';
+
+import Footer from '../components/layout/Footer';
+import Header from '../components/layout/Header';
+import ScrollToTopButton from '../components/utility/ScrollToTopButton';
 
 const { Content } = Layout;
 
@@ -13,6 +15,7 @@ export function MainLayout() {
         <Outlet />
       </Content>
       <Footer />
+      <ScrollToTopButton />
     </Layout>
   );
 }

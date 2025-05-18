@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+import { NotificationType } from '../../types';
+
 type NotificationMessage = {
   type: NotificationType;
   message: string;
