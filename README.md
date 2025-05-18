@@ -13,6 +13,8 @@ This project is a modern frontend application built with React and Vite, designe
   - [Building the Project](#building-the-project)
   - [Linting and Formatting](#linting-and-formatting)
 - [Project Structure](#project-structure)
+- [UI Screenshots](#ui-screenshots)
+- [Demo Video](#-demo-video)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -177,6 +179,41 @@ grab-bootcamp-frontend/
 ├── tsconfig.node.json
 └── vite.config.ts      # Vite configuration
 ```
+
+## UI Screenshots
+
+Here are some preview screenshots of the Grab Bootcamp Frontend in action:
+
+### 🔍 Sign In Page
+
+![Sign In Page](./screenshots/signin.png)
+
+### 🔍 Sign Up Page
+
+![Sign Up Page](./screenshots/signup.png)
+
+### 🔍 Home Page
+
+![Home Page](./screenshots/home.png)
+
+### 📸 Image Upload and Search
+
+![Upload and Search](./screenshots/upload-search.png)
+![Upload and Search](./screenshots/uploaded-search.png)
+
+### 🍽️ Search Results Page
+
+![Search Results](./screenshots/search-results.png)
+
+### 🏪 Restaurant Details Page
+
+![Restaurant Details](./screenshots/restaurant-details.png)
+
+## 🎥 Demo Video
+
+Check out the full demo here: [Watch on YouTube](https://youtu.be/V_TiwK4_2l0)
+
+[![Watch the demo](./screenshots/thumbnail.png)](https://youtu.be/V_TiwK4_2l0)
 
 ## Contributing
 
